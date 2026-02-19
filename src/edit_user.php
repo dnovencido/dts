@@ -14,7 +14,7 @@
 
   if(isset($_POST['submit'])) {
     $role_id = (int)$_POST['role_id'];
-    if(update_profile($user_id, $_POST['fname'], $_POST['mname'], $_POST['lname'], $_POST['employee_id'], $_POST['email'], $_POST['password']) && update_user_role($user_id, $role_id)) {
+    if(update_profile($user_id, $_POST['fname'], $_POST['mname'], $_POST['lname'], $_POST['employee_id'],  $_POST['email'], $_POST['position'], $_POST['password']) && update_user_role($user_id, $role_id)) {
       $_SESSION['flash_message'] = [
         'type' => 'success',
         'text' => 'You have successfully updated a user.'
@@ -88,6 +88,10 @@
                               <div class="form-group">
                                 <label>Employee ID</label>
                                 <input type="text" name="employee_id" class="form-control" value="<?= htmlspecialchars($user['employee_id']) ?>">
+                              </div>
+                              <div class="form-group">
+                                <label>Position</label>
+                                <input type="text" name="position" class="form-control" value="<?= htmlspecialchars($user['position']) ?>">
                               </div>
                               <div class="form-group">
                                 <label>Email</label>

@@ -1,6 +1,99 @@
 <IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteCond %{REQUEST_FILENAME}.php -f
-  RewriteRule ^([^\.]+)$ $1.php [NC,L]
+RewriteEngine On
+
+# ================================
+# Ignore real files/folders
+# ================================
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# ================================
+# Redirect old PHP URLs
+# ================================
+RewriteRule ^documents_incoming\.php$ /documents/incoming [R=301,L]
+
+# ================================
+# Documents - Incoming
+# ================================
+RewriteRule ^documents/incoming/?$ documents_incoming.php [L]
+RewriteRule ^documents/incoming/new/?$ documents_incoming_new.php [L]
+RewriteRule ^documents/incoming/view/([0-9]+)/?$ documents_incoming_view.php?id=$1 [L,QSA]
+RewriteRule ^documents/incoming/edit/([0-9]+)/?$ documents_incoming_edit.php?id=$1 [L,QSA]
+
+# ================================
+# Documents - Outgoing
+# ================================
+RewriteRule ^documents/outgoing/?$ documents_outgoing.php [L]
+RewriteRule ^documents/outgoing/new/?$ documents_outgoing_new.php [L]
+RewriteRule ^documents/outgoing/view/([0-9]+)/?$ documents_outgoing_view.php?id=$1 [L,QSA]
+RewriteRule ^documents/outgoing/edit/([0-9]+)/?$ documents_outgoing_edit.php?id=$1 [L,QSA]
+
+# ================================
+# Documents - General View
+# ================================
+RewriteRule ^documents/view/([0-9]+)/?$ documents_view.php?id=$1 [L,QSA]
+RewriteRule ^documents/delete/([0-9]+)/?$ documents_delete.php?id=$1 [L,QSA]
+
+# ================================
+# Divisions
+# ================================
+RewriteRule ^divisions/new/?$ divisions_new.php [L]
+RewriteRule ^divisions/?$ divisions_list.php [L]
+RewriteRule ^divisions/view/([0-9]+)/?$ divisions_view.php?id=$1 [L,QSA]
+RewriteRule ^divisions/edit/([0-9]+)/?$ divisions_edit.php?id=$1 [L,QSA]
+RewriteRule ^divisions/delete/([0-9]+)/?$ divisions_delete.php?id=$1 [L,QSA]
+
+# ================================
+# Receiving Offices
+# ================================
+RewriteRule ^receiving_offices/new/?$ receiving_offices_new.php [L]
+RewriteRule ^receiving_offices/?$ receiving_offices.php [L]
+RewriteRule ^receiving_offices/view/([0-9]+)/?$ receiving_offices_view.php?id=$1 [L,QSA]
+RewriteRule ^receiving_offices/edit/([0-9]+)/?$ receiving_offices_edit.php?id=$1 [L,QSA]
+RewriteRule ^receiving_offices/delete/([0-9]+)/?$ receiving_offices_delete.php?id=$1 [L,QSA]
+
+# ================================
+# Document Types
+# ================================
+RewriteRule ^document_types/new/?$ document_types_new.php [L]
+RewriteRule ^document_types/?$ document_types_list.php [L]
+RewriteRule ^document_types/view/([0-9]+)/?$ document_types_view.php?id=$1 [L,QSA]
+RewriteRule ^document_types/edit/([0-9]+)/?$ document_types_edit.php?id=$1 [L,QSA]
+RewriteRule ^document_types/delete/([0-9]+)/?$ document_types_delete.php?id=$1 [L,QSA]
+
+# ================================
+# Location of Filings
+# ================================
+RewriteRule ^filing_locations/new/?$ filing_locations_new.php [L]
+RewriteRule ^filing_locations/?$ filing_locations_list.php [L]
+RewriteRule ^filing_locations/view/([0-9]+)/?$ filing_locations_view.php?id=$1 [L,QSA]
+RewriteRule ^filing_locations/edit/([0-9]+)/?$ filing_locations_edit.php?id=$1 [L,QSA]
+RewriteRule ^filing_locations/delete/([0-9]+)/?$ filing_locations_delete.php?id=$1 [L,QSA]
+
+
+# ================================
+# Stakeholders
+# ================================
+RewriteRule ^stakeholders/new/?$ stakeholders_new.php [L]
+RewriteRule ^stakeholders/?$ stakeholders_list.php [L]
+RewriteRule ^stakeholders/view/([0-9]+)/?$ stakeholders_view.php?id=$1 [L,QSA]
+RewriteRule ^stakeholders/edit/([0-9]+)/?$ stakeholders_edit.php?id=$1 [L,QSA]
+RewriteRule ^stakeholders/delete/([0-9]+)/?$ stakeholders_delete.php?id=$1 [L,QSA]
+
+# ================================
+# Reports
+# ================================
+RewriteRule ^reports/?$ reports.php [L]
+
+# ================================
+# Dashboard
+# ================================
+RewriteRule ^dashboard/?$ dashboard.php [L]
+
+
+# ================================
+# Generic fallback (LAST)
+# ================================
+RewriteRule ^([^\.]+)$ $1.php [NC,L]
+
 </IfModule>

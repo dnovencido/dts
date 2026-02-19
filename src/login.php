@@ -5,7 +5,7 @@
     $errors = []; 
 
     if(isset($_SESSION['id'])) {
-        header("Location: registrations.php");
+        header("Location: /dashboard/");
     }
 
     if(isset($_POST['submit'])) {
@@ -20,7 +20,7 @@
             if(!empty($user)) {
                 $_SESSION['id'] = $user['id'];
                 $_SESSION['fname'] = $user['fname'];
-                header("Location: registrations.php");
+                header("Location: /dashboard/");
                 exit;
             } else {    
                 $errors[] = "The email that you've entered does not match any account.";
@@ -38,9 +38,9 @@
     <div class="card card-outline card-primary">
         <div id="logo-header" class="card-header text-center">
             <div id="logo">
-                <img src="assets/images/logo.svg" alt="">
+                <img src="assets/images/logo.png" alt="">
             </div>
-            <h1>Student Registration Information System</h1>
+            <h1>Document Tracking System</h1>
         </div>
         <div class="card-body">
             <p class="login-box-msg">Sign in to your account</p>
@@ -84,6 +84,9 @@
         <!-- /.card-body -->
     </div>
     <!-- /.card -->
-    </div>        
-</body
+    </div> 
+    <script src="/assets/jquery/jquery.min.js"></script>  
+    <script src="/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/admin-lte/js/adminlte.min.js"></script>
+</body>
 <?php include 'layouts/_footer.php'; ?>

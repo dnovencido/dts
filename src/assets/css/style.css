@@ -107,3 +107,38 @@ ul {
 .sidebar-collapse .brand-link .brand-image {
      margin-right: 0;
 }
+.select2-container--classic .select2-results>.select2-results__options {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+th.table-light {
+    background-color: #f8f9fa;
+}
+
+.select2-container--default .select2-selection--single { 
+  height: 38px;
+}
+
+.select2-container--classic .select2-selection--multiple {
+   height: 38px;
+}
+
+.select2-container--classic .select2-search--inline .select2-search__field {
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.main-sidebar, .layout-navbar-fixed .wrapper .sidebar-dark-primary .brand-link:not([class*="navbar"]) {
+  background-color: #221d75;
+}
+
+.select-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
+#charts {
+    border: 1px solid;
+}

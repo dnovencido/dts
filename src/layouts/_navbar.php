@@ -1,6 +1,3 @@
-<?php
-  include "session.php";
-?>
 <!-- Navbar -->
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
     <!-- Left navbar links -->
@@ -16,7 +13,7 @@
             <i class="fa-regular fa-circle-user"></i> <?= $_SESSION['fname'] ?>
           </a>
           <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-            <a class="dropdown-item" href="logout.php?logout=true">Logout</a>
+            <a class="dropdown-item" href="/logout.php?logout=true">Logout</a>
           </div>
       </div>
       </li>

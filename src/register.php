@@ -5,7 +5,7 @@
     $errors = [];
 
     if(isset($_SESSION['id'])) {
-        header("Location: registrations.php");
+        header("Location: /documents/incoming");
     }
 
     if(isset($_POST['submit'])) {
@@ -24,15 +24,24 @@
         if($_POST['password'] != $_POST['confirm_password']) {
             $errors[] = "You must confirm your password.";
         }
+        if(!$_POST['employee_id']) {
+            $errors[] = "Employee ID is required.";
+        }
+        if(!$_POST['position']) {
+            $errors[] = "Position is required.";
+        }
 
         if(empty($errors)) {
             if(!check_existing_email($_POST['email'])) {
-                $user = save_registration($_POST['fname'],$_POST['mname'], $_POST['lname'], $_POST['email'], $_POST['password']);
+                $user = save_registration($_POST['fname'],$_POST['mname'], $_POST['lname'], $_POST['email'], $_POST['password'], $_POST['employee_id'], $_POST['position']);
                 if(!empty($user)) {
                     $_SESSION['id'] = $user['id'];
                     $_SESSION['fname'] = $user['fname'];
-                    $_SESSION['flash_message'] = "You have successfully created an account.";
-                    header("Location: registrations.php");
+                    $_SESSION['flash_message'] = [
+                        'type' => 'success',
+                        'text' => 'You have successfully created an account.'
+                    ];
+                    header("Location: /dashboard/");
                     exit;
                 } else {
                     $errors[] = "There was an error logging in your account.";
@@ -49,9 +58,9 @@
         <div class="register-logo">
             <div id="logo-header">
                 <div id="logo">
-                    <img src="assets/images/logo.svg" alt="">
+                    <img src="assets/images/logo.png" alt="">
                 </div>
-                <h1 class="logo-label">Student Registration Information System</h1>
+                <h1 class="logo-label">Document Tracking System</h1>
             </div>
         </div>
         <?php if (!empty($errors)) { ?>
@@ -90,6 +99,22 @@
                     <div class="input-group-append">
                         <div class="input-group-text">
                         <span class="fas fa-envelope"></span>
+                        </div>
+                    </div>
+                </div>
+                 <div class="input-group mb-3">
+                    <input type="text" class="form-control" name="employee_id" value="<?= htmlspecialchars($_POST['employee_id'] ?? '', ENT_QUOTES) ?>" placeholder="Employee ID">
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                        <span class="fas fa-id-card"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" name="position" value="<?= htmlspecialchars($_POST['position'] ?? '', ENT_QUOTES) ?>" placeholder="Position">
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                        <span class="fas fa-briefcase"></span>
                         </div>
                     </div>
                 </div>

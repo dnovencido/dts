@@ -7,7 +7,7 @@
         $users = ['total' => 0, 'result' => []];
     
         $query = "SELECT 
-                    u.id, u.fname, u.mname, u.lname, u.email, u.date_created
+                    u.id, u.fname, u.mname, u.lname, u.email, u.employee_id, u.position, u.date_created
                   FROM users u";
     
         $conditions = [];
@@ -18,7 +18,6 @@
         if (!empty($filter)) {
             foreach ($filter as $column => $value) {
                 if ($column === "search" && is_array($value)) {
-                    // Example: ["columns" => ["first_name","last_name"], "term" => "john"]
                     $searchCols = $value[0] ?? [];
                     $searchTerm = $value[1] ?? "";
     
@@ -81,7 +80,7 @@
         return $registrations;
     }
 
-    function update_profile($user_id, $fname, $mname, $lname, $employee_id, $email, $password) {
+    function update_profile($user_id, $fname, $mname, $lname, $employee_id, $email, $position, $password) {
         global $conn;
         $flag = false;
 
@@ -105,11 +104,11 @@
 
         // Update the user profile
         $update_sql = "UPDATE users 
-                       SET fname = ?, mname = ?, lname = ?, employee_id = ?, email = ?, password = ?
+                       SET fname = ?, mname = ?, lname = ?, employee_id = ?, email = ?, position = ?, password = ?
                        WHERE id = ?";
 
         if ($stmt = $conn->prepare($update_sql)) {
-            $stmt->bind_param("ssssssi", $fname, $mname, $lname, $employee_id, $email, $hashed_password, $user_id);
+            $stmt->bind_param("sssssssi", $fname, $mname, $lname, $employee_id, $email, $position, $hashed_password, $user_id);
             if ($stmt->execute()) {
                 $flag = true;
             }
@@ -117,5 +116,25 @@
         }
 
         return $flag;
+    }
+
+    function get_user_role_name($user_id) {
+        global $conn;
+        $role_name = '';
+
+        $query = "SELECT r.role_name 
+                  FROM roles r
+                  JOIN user_roles ur ON r.id = ur.role_id
+                  WHERE ur.user_id = ? LIMIT 1";
+
+        if ($stmt = $conn->prepare($query)) {
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $stmt->bind_result($role_name);
+            $stmt->fetch();
+            $stmt->close();
+        }
+
+        return $role_name;
     }
 ?>

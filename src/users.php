@@ -75,6 +75,8 @@
                                     <th>Middle Name</th>
                                     <th>Last Name</th>
                                     <th>Email</th>
+                                    <th>Position</th>
+                                    <th>Role</th>
                                     <th>Date Created</th>
                                     <th>Actions</th>
                                 </tr>
@@ -88,6 +90,8 @@
                                         <td><?= $value['mname'] ?></td>
                                         <td><?= $value['lname'] ?></td>
                                         <td><?= $value['email'] ?></td>
+                                        <td><?= $value['position'] ?></td>
+                                        <td><?= get_user_role_name($value['id']) ?></td>
                                         <td><?= date('M d, Y @ h:i a', strtotime($value['date_created'])) ?></td>
                                         <td class="action-buttons">
                                           <a href="edit_user.php?id=<?= $value['id'] ?>" class="btn bg-gradient-primary btn-sm">

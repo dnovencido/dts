@@ -1,7 +1,7 @@
 <?php
     include "models/user_role.php";
 
-    function require_role($user_id, $roles, $module, $redirect = "dashboard.php") {
+    function require_role($user_id, $roles, $module, $redirect = "dashboard") {
         if (!user_has_role($user_id, $roles)) {
             $_SESSION['flash_message'] = [
                 'type' => 'danger',
