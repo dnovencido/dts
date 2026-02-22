@@ -23,7 +23,7 @@ function send_mail($toEmail, $toName, $subject, $body)
         $mail->Port       = 465;
 
         // Email Headers
-        $mail->setFrom('no-reply@dts-coa.site', 'Document Tracking System');
+        $mail->setFrom('no-reply@coa-dts.site', 'Document Tracking System');
         $mail->addAddress($toEmail, $toName);
 
         $mail->isHTML(true);
