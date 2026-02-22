@@ -96,13 +96,15 @@
                                     <?php $signatories = get_signatories(
                                       json_decode($document['signatories'], true)
                                     ); ?>
-                                    <td><?= htmlspecialchars(implode(', ', $signatories)) ?></td>
+                                    <td colspan="3"><?= htmlspecialchars(implode(', ', $signatories)) ?></td>
                                 </tr>
                                 <tr>
+                                  <th class="table-light">Encoded By</th>
+                                  <td colspan="3"><?= htmlspecialchars($document['emp_name'], ENT_QUOTES) ?></td>
                                   <th class="table-light">Location of Filing</th>
                                   <td><?= !empty($document['filing_location_name']) ? htmlspecialchars($document['filing_location_name'], ENT_QUOTES) : '-' ?></td>
                                   <th class="table-light">Status</th>
-                                  <td><?= !empty($document['status']) ? ucfirst(strtolower(htmlspecialchars($document['status'], ENT_QUOTES))) : '-' ?></td>
+                                  <td colspan="3"><?= !empty($document['status']) ? ucfirst(strtolower(htmlspecialchars($document['status'], ENT_QUOTES))) : '-' ?></td>
                                 </tr>
                               </tbody>
                             </table>

@@ -2,7 +2,7 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a href="" class="brand-link">
-      <img src="/assets/images/logo-white.png" />
+      <img src="/assets/images/logo.png" />
       <span class="brand-text">DTS</span>
     </a>
     <!-- Sidebar -->

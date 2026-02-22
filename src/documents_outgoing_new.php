@@ -39,6 +39,7 @@
       $errors = validate_document($_POST, $_FILES['file']['tmp_name']);
       if(empty($errors)) {
         $_POST['category'] = 2;
+        $_POST['user_id'] = $_SESSION['id'];
         $save_document = save_document($_POST);
         if($save_document) {
           $_SESSION['flash_message'] = [

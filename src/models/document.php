@@ -68,7 +68,7 @@
 
         // Allowed columns
         $allowed = [
-            'title', 'category', 'document_type', 'document_date',
+            'title', 'user_id', 'category', 'document_type', 'document_date',
             'document_number', 'date_received','concerned_division', 'names_stakeholders',
             'receiving_office','signatories','status','filing_location','file', 'file_name', 'file_type', 'last_updated', 'date_created'
         ];
@@ -150,7 +150,7 @@
 
             $stmt->bind_param($types, ...$values);
         }
-
+ 
         if($stmt->execute())
             $flag = true;
 
@@ -194,7 +194,6 @@
 
         $query = "SELECT 
                 d.*, 
-                f.name AS filing_location_name,
                 c.name AS category_name, 
                 dt.name AS document_type_name,
                 r.name AS receiving_office_names
@@ -375,10 +374,17 @@
         global $conn;
         $document = [];
 
-        $query = "SELECT d.*, f.name as filing_location_name, dt.name AS `document_type_name`, r.name AS `receiving_office_name` FROM `documents` as d 
+        $query = "SELECT d.*, 
+           CONCAT(
+                    u.fname, ' ',
+                    IF(u.mname IS NOT NULL AND u.mname != '', CONCAT(u.mname, ' '), ''),
+                    u.lname
+                ) AS emp_name,
+            f.name as filing_location_name, dt.name AS `document_type_name`, r.name AS `receiving_office_name` FROM `documents` as d 
             INNER JOIN `categories` as `c` ON d.category = c.id 
             INNER JOIN `document_types` as `dt` ON d.document_type = dt.id 
             INNER JOIN `filing_locations` as `f` ON d.filing_location = f.id
+            INNER JOIN `users` as `u` ON d.user_id = u.id
             INNER JOIN receiving_offices r ON d.receiving_office = r.id WHERE d.id = ?";
 
         if ($stmt = $conn->prepare($query)) {

@@ -28,7 +28,7 @@
         }
       }
     }
-    if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
+    if(isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
       $file_name = $_FILES['file']['name'];
       $file_type = $_FILES['file']['type'];
       $tmp_path = $_FILES['file']['tmp_name'];
@@ -41,6 +41,7 @@
 
     if(empty($errors)) {
       $_POST['category'] = 1;
+      $_POST['user_id'] = $_SESSION['id'];
       $save_document = save_document($_POST);
       if($save_document) {
         $_SESSION['flash_message'] = [
