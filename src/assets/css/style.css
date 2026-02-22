@@ -65,10 +65,16 @@
 
 #logo {
     gap: 10px;
+    
 }
 
 #logo-header div {
-   width: 120px;
+    width: 70px;
+    height: auto;
+}
+
+#logo-header div img {
+  flex-shrink: 0;
 }
 
 #logo-header h1 {
