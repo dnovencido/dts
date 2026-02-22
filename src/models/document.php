@@ -194,6 +194,7 @@
 
         $query = "SELECT 
                 d.*, 
+                f.name AS filing_location_name,
                 c.name AS category_name, 
                 dt.name AS document_type_name,
                 r.name AS receiving_office_names
