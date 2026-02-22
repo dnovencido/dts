@@ -48,7 +48,7 @@
         <div id="logo-header" class="card-header text-center">
             <div id="logo" class="d-flex justify-content-center gap-3 mb-3">
                 <img src="assets/images/logo.png" alt="">
-                <img src="assets/images/dpwh.jpeg" alt="">
+                <img src="assets/images/dpwh.png" alt="">
             </div>
             <h1>Document Tracking System</h1>
         </div>
