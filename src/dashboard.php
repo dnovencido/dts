@@ -3,6 +3,7 @@
   include "models/user_role.php"; 
   include "models/document.php";
   include "require_login.php"; 
+  include "require_role.php";
 
   $document_count = get_document_counts();
 

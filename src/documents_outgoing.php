@@ -6,7 +6,8 @@
   include "require_role.php"; 
   include "status.php";
 
-  //require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee'], 'student registration');
+  require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee'], 'outgoing document management');
+
   $document_types = get_document_types(["outgoing"]);
 
   $filter = [];

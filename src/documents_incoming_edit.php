@@ -9,7 +9,7 @@
   include "require_login.php"; 
   include "require_role.php"; 
 
-  //require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee'], 'student registration');
+  require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee'], 'incoming document management');
 
   $errors = [];
   if (array_key_exists("id", $_GET)) {

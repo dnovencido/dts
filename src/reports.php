@@ -6,6 +6,8 @@
     include "require_role.php"; 
     require "dompdf/autoload.inc.php";
 
+    require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee'], 'reports document management');
+
     use Dompdf\Dompdf;
     use Dompdf\Options;
 

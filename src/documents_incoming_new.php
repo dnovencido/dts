@@ -9,7 +9,8 @@
   include "require_login.php"; 
   include "require_role.php"; 
 
-  //require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee'], 'student registration');
+  require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee'], 'incoming document management');
+
   $document_types = get_document_types(["incoming"]);
   $divisions = get_all_divisions();
   $receiving_offices = get_all_receiving_offices();
