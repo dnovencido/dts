@@ -61,6 +61,18 @@
         $logoLeftData  = base64_encode(file_get_contents($logoLeft));
         $logoRightData = base64_encode(file_get_contents($logoRight));
 
+        $date_range_text = "";
+
+        if (!empty($_GET['date_received'])) {
+            $dates = explode(' - ', $_GET['date_received']);
+            $from = DateTime::createFromFormat('m/d/Y', trim($dates[0]));
+            $to   = DateTime::createFromFormat('m/d/Y', trim($dates[1]));
+
+            $date_range_text = date('F d, Y', strtotime($from->format('Y-m-d'))) . 
+                " - " . 
+                date('F d, Y', strtotime($to->format('Y-m-d')));
+        }
+
         // Build report HTML
         $html = '
         <style>
@@ -73,6 +85,10 @@
             width: 100%;
             text-align: center;
             position: relative;
+        }
+        
+        .report-title {
+            margin-top: 35px;
         }
 
         .logo-left {
@@ -124,8 +140,11 @@
                     <h3>Regional Office 1</h3>
                     <h3>Aguila Road, Sevilla, City of San Fernando, La Union</h3>
                 </div>
-                <h2>List of Documents</h2>
-            </div>
+                <h2 class="report-title">List of Documents</h2>';
+                if(!empty($date_range_text)) {
+                    $html .= '<p><strong>From:</strong> '.$date_range_text.'</p>';
+                }
+        $html .='</div>
         </div>
         <table>
             <thead>
