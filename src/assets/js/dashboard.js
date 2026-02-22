@@ -18,7 +18,6 @@ function loadNumberDocumentChart(range = 3) {
         const ctx = document
             .getElementById('document_line_chart')
             .getContext('2d');
-
         // Destroy only line chart
         if (lineChart) {
             lineChart.destroy();
@@ -54,6 +53,7 @@ function loadNumberDocumentChart(range = 3) {
 
             options: {
                 responsive: true,
+                // maintainAspectRatio: false,
                 interaction: {
                     mode: 'index',
                     intersect: false
@@ -62,7 +62,17 @@ function loadNumberDocumentChart(range = 3) {
                     y: {
                         beginAtZero: true
                     }
-                }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            // This more specific font property overrides the global property
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                }   
             }
 
         });
@@ -97,7 +107,16 @@ function loadNumberDocumentTypeChart(category = 1) {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                }                
             }
         });
     });

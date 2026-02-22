@@ -4,6 +4,7 @@
   include "lib/pagination.php";
   include "require_login.php"; 
   include "require_role.php"; 
+  include "status.php";
 
   //require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee'], 'student registration');
 
@@ -22,6 +23,13 @@
     $filter['item'][] = [
       'column' => 'document_type',
       'value'  => $_GET['document_type']
+    ];
+  }
+
+  if (!empty($_GET['status'])) {
+    $filter['item'][] = [
+      'column' => 'status',
+      'value'  => $_GET['status']
     ];
   }
 
@@ -50,6 +58,8 @@
       }
     }
   }
+
+  $config = $status_config[$type] ?? ['options' => []];
 
   if (isset($_GET['page_no'])) {
     $page_no = $_GET['page_no'];
@@ -103,7 +113,7 @@
                             <p>All Received Documents</p>
                           </div>
                           <div class="icon">
-                                <i class="ion ion-android-document"></i>
+                            <i class="ion ion-document-text"></i>
                           </div>
                         </div>
                       </div>
@@ -126,13 +136,13 @@
                       <form method="get">
                         <div id="form-search">
                           <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                               <div class="form-group">
                                 <label for="query">Title / Document Number</label>
                                 <input type="text" name="query" id="query" class="form-control" value="<?= isset($_GET['query']) ? htmlspecialchars($_GET['query'], ENT_QUOTES) : '' ?>">
                               </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                               <div class="form-group">
                                 <label for="document_type">Document Type</label>
                                 <select name="document_type" id="document_type" class="form-control">
@@ -143,7 +153,21 @@
                                 </select>
                               </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                              <div class="form-group">
+                                <label>Status</label>
+                                <select class="form-control" id="status" name="status">
+                                    <option value="">-- Select Status --</option>
+                                    <?php foreach ($config['options'] as $value => $label): ?>
+                                    <option value="<?= $value ?>"
+                                        <?= (($_GET['status'] ?? '') === $value) ? 'selected' : '' ?>>
+                                        <?= $label ?>
+                                    </option>
+                                    <?php endforeach; ?>
+                                </select>
+                              </div>
+                            </div>
+                            <div class="col-md-3">
                               <div class="form-group">
                                 <label>Date Received:</label>
                                 <input type="text" class="form-control date-range" name="date_received" value="<?= isset($_GET['date_received']) ? htmlspecialchars($_GET['date_received'], ENT_QUOTES) : '' ?>"/>

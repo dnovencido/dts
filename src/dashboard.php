@@ -43,9 +43,9 @@
                             <p>Incoming Documents</p>
                           </div>
                           <div class="icon">
-                            <i class="ion ion-bag"></i>
+                            <i class="ion ion-document-text"></i>
                           </div>
-                          <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                          <a href="/documents/incoming" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                         </div>
                       </div>
                       <!-- ./col -->
@@ -57,9 +57,9 @@
                             <p>Outgoing Documents</p>
                           </div>
                           <div class="icon">
-                            <i class="ion ion-stats-bars"></i>
+                            <i class="ion ion-paper-airplane"></i>
                           </div>
-                          <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                          <a href="/documents/outgoing" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                         </div>
                       </div>
                       <!-- ./col -->
@@ -71,7 +71,7 @@
                             <p>Pending Incoming Documents</p>
                           </div>
                           <div class="icon">
-                            <i class="ion ion-person-add"></i>
+                            <i class="ion ion-clock"></i>
                           </div>
                           <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                         </div>
@@ -85,7 +85,7 @@
                             <p>Pending Outgoing Documents</p>
                           </div>
                           <div class="icon">
-                            <i class="ion ion-pie-graph"></i>
+                            <i class="ion ion-clipboard"></i>
                           </div>
                           <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                         </div>

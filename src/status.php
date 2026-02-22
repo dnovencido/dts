@@ -1,9 +1,17 @@
 <?php
 
     // Get current URL path
-    $path = strtolower(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
+    $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-    // Detect document type from URL
+    /* Normalize: remove multiple slashes */
+    $path = preg_replace('#/+#','/', $path);
+
+    /* Add trailing slash if missing */
+    if (substr($path, -1) !== '/') {
+        $path .= '/';
+    }
+
+    /* Detect type */
     if (strpos($path, '/incoming/') !== false) {
         $type = 'incoming';
     } elseif (strpos($path, '/outgoing/') !== false) {
