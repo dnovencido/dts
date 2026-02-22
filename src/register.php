@@ -35,14 +35,45 @@
             if(!check_existing_email($_POST['email'])) {
                 $user = save_registration($_POST['fname'],$_POST['mname'], $_POST['lname'], $_POST['email'], $_POST['password'], $_POST['employee_id'], $_POST['position']);
                 if(!empty($user)) {
-                    $_SESSION['id'] = $user['id'];
-                    $_SESSION['fname'] = $user['fname'];
-                    $_SESSION['flash_message'] = [
-                        'type' => 'success',
-                        'text' => 'You have successfully created an account.'
-                    ];
-                    header("Location: /dashboard/");
-                    exit;
+                    // Load mailer
+                    require "lib/mailer.php";
+                    $verify_link = "http://localhost:9001/verify.php?token=" . $user['token'];
+
+                    $email_body = "
+                        Hi {$user['fname']},<br><br>
+                        Thank you for registering.<br><br>
+                        Please verify your account by clicking the link below:<br><br>
+                        <a href='{$verify_link}'>Verify Account</a><br><br>
+                        This link will expire in 24 hours.<br><br>
+                        Thank you.
+                    ";
+
+                    $mail_result = send_mail(
+                        $user['email'],
+                        $user['fname'],
+                        "Verify Your Account",
+                        $email_body
+                    );
+
+                    if ($mail_result === true) {
+                        $_SESSION['flash_message'] = [
+                            'type' => 'success',
+                            'text' => 'Registration successful! Please check your email to verify your account.'
+                        ];
+                        header("Location: /login/");
+                        exit;
+                    } else {
+                        $errors[] = "Registration successful but email could not be sent.";
+                    }
+
+                    // $_SESSION['id'] = $user['id'];
+                    // $_SESSION['fname'] = $user['fname'];
+                    // $_SESSION['flash_message'] = [
+                    //     'type' => 'success',
+                    //     'text' => 'You have successfully created an account.'
+                    // ];
+                    // header("Location: /dashboard/");
+                    // exit;
                 } else {
                     $errors[] = "There was an error logging in your account.";
                 }
@@ -57,8 +88,9 @@
     <div class="register-box">
         <div class="register-logo">
             <div id="logo-header">
-                <div id="logo">
+                <div id="logo" class="d-flex justify-content-center gap-3 mb-3">
                     <img src="assets/images/logo.png" alt="">
+                    <img src="assets/images/dpwh.jpeg" alt="">
                 </div>
                 <h1 class="logo-label">Document Tracking System</h1>
             </div>

@@ -80,7 +80,7 @@
         return $registrations;
     }
 
-    function update_profile($user_id, $fname, $mname, $lname, $employee_id, $email, $position, $password) {
+    function update_profile($user_id, $fname, $mname, $lname, $employee_id, $email, $position, $password, $is_verified) {
         global $conn;
         $flag = false;
 
@@ -104,11 +104,11 @@
 
         // Update the user profile
         $update_sql = "UPDATE users 
-                       SET fname = ?, mname = ?, lname = ?, employee_id = ?, email = ?, position = ?, password = ?
+                       SET fname = ?, mname = ?, lname = ?, employee_id = ?, email = ?, position = ?, password = ?, is_verified = ?
                        WHERE id = ?";
 
         if ($stmt = $conn->prepare($update_sql)) {
-            $stmt->bind_param("sssssssi", $fname, $mname, $lname, $employee_id, $email, $position, $hashed_password, $user_id);
+            $stmt->bind_param("sssssssii", $fname, $mname, $lname, $employee_id, $email, $position, $hashed_password, $is_verified, $user_id);
             if ($stmt->execute()) {
                 $flag = true;
             }

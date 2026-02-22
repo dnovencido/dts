@@ -24,10 +24,14 @@
         global $conn;
         $user = [];
 
+        // Generate verification token
+        $token = bin2hex(random_bytes(32));
+        $expires = date("Y-m-d H:i:s", strtotime("+24 hours"));
+
         $date_created = date('Y-m-d H:i:s');
-        $sql = "INSERT INTO users (fname, mname, lname, email, password, employee_id, position, date_created) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO users (fname, mname, lname, email, password, employee_id, position, date_created, verification_token, token_expires, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssssssss", $fname, $mname, $lname, $email, $password, $employee_id, $position, $date_created);
+        $stmt->bind_param( "ssssssssss", $fname, $mname, $lname, $email, $password, $employee_id, $position, $date_created, $token, $expires);
 
         if ($stmt->execute()) {
             $id = $conn->insert_id;
@@ -51,7 +55,8 @@
                     $user = [
                         'id' => $row['id'],
                         'fname' => $row['fname'],
-                        'email' => $row['email']
+                        'email' => $row['email'],
+                        'token' => $token
                     ];
                 }
                 $stmt->close();

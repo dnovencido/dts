@@ -61,11 +61,14 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 1rem;
+}
+
+#logo {
+    gap: 10px;
 }
 
 #logo-header div {
-    width: 70px;
+   width: 140px;
 }
 
 #logo-header h1 {

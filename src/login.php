@@ -18,10 +18,16 @@
         if(empty($errors)) {
             $user = login_account($_POST['email'], $_POST['password']);
             if(!empty($user)) {
-                $_SESSION['id'] = $user['id'];
-                $_SESSION['fname'] = $user['fname'];
-                header("Location: /dashboard/");
-                exit;
+                // Check if verified
+                if (is_account_verified($_POST['email'])) {
+                    $_SESSION['id'] = $user['id'];
+                    $_SESSION['fname'] = $user['fname'];
+
+                    header("Location: /dashboard/");
+                    exit;
+                } else {
+                    $errors[] = "Your account is not verified. Please check your email.";
+                }
             } else {    
                 $errors[] = "The email that you've entered does not match any account.";
             }
@@ -35,10 +41,14 @@
     <?php if (!empty($errors)) { ?>
         <?php include "layouts/_errors.php" ?>
     <?php } ?>
+    <?php if(isset($_SESSION['flash_message'])) { ?>
+        <?php include "layouts/_messages.php"; ?>
+    <?php } ?>
     <div class="card card-outline card-primary">
         <div id="logo-header" class="card-header text-center">
-            <div id="logo">
+            <div id="logo" class="d-flex justify-content-center gap-3 mb-3">
                 <img src="assets/images/logo.png" alt="">
+                <img src="assets/images/dpwh.jpeg" alt="">
             </div>
             <h1>Document Tracking System</h1>
         </div>

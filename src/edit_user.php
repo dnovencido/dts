@@ -14,7 +14,8 @@
 
   if(isset($_POST['submit'])) {
     $role_id = (int)$_POST['role_id'];
-    if(update_profile($user_id, $_POST['fname'], $_POST['mname'], $_POST['lname'], $_POST['employee_id'],  $_POST['email'], $_POST['position'], $_POST['password']) && update_user_role($user_id, $role_id)) {
+    $is_verified = isset($_POST['is_verified']) ? 1 : 0;
+    if(update_profile($user_id, $_POST['fname'], $_POST['mname'], $_POST['lname'], $_POST['employee_id'],  $_POST['email'], $_POST['position'], $_POST['password'], $is_verified) && update_user_role($user_id, $role_id)) {
       $_SESSION['flash_message'] = [
         'type' => 'success',
         'text' => 'You have successfully updated a user.'
@@ -111,6 +112,13 @@
                                     </option>
                                   <?php endforeach; ?>
                                 </select>
+                              </div>
+                              <div class="form-group">
+                                <label>
+                                    <input type="checkbox" name="is_verified" value="1"
+                                        <?= ($user['is_verified'] == 1) ? 'checked' : '' ?>>
+                                    Mark as Verified
+                                </label>
                               </div>
                               <button type="submit" name="submit" class="btn btn-primary btn-md mt-3">Save Changes</button>
                             </div>
