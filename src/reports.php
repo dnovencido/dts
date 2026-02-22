@@ -132,8 +132,8 @@
         </style>
 
         <div class="header">
-            <img src="data:image/png;base64,'.$logoLeftData.'" width="80" class="logo-left">
-            <img src="data:image/png;base64,'.$logoRightData.'" width="80" class="logo-right">
+            <img src="data:image/png;base64,'.$logoLeftData.'" width="80" class="logo-left" alt="Logo Left">
+            <img src="data:image/png;base64,'.$logoRightData.'" width="80" class="logo-right" alt="Logo Right">
             <div class="title">
                 <div class="upper">
                     <h3>Republic of the Philippines</h3>
@@ -143,7 +143,7 @@
                 </div>
                 <h2 class="report-title">List of Documents</h2>';
                 if(!empty($date_range_text)) {
-                    $html .= '<p><strong>'.$date_range_text.'</strong></p>';
+                    $html .= '<p><strong>'.$date_range_text . $_SERVER['DOCUMENT_ROOT'].'</strong></p>';
                 }
         $html .='</div>
         </div>
