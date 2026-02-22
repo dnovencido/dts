@@ -143,7 +143,7 @@
                 </div>
                 <h2 class="report-title">List of Documents</h2>';
                 if(!empty($date_range_text)) {
-                    $html .= '<p><strong>'.$date_range_text . $_SERVER['DOCUMENT_ROOT'].'</strong></p>';
+                    $html .= '<p><strong>'.$date_range_text.'</strong></p>';
                 }
         $html .='</div>
         </div>
