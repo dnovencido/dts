@@ -60,7 +60,7 @@
                             'type' => 'success',
                             'text' => 'Registration successful! Please check your email to verify your account.'
                         ];
-                        header("Location: /login/");
+                        header("Location: /login");
                         exit;
                     } else {
                         $errors[] = "Registration successful but email could not be sent.";
