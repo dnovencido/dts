@@ -10,6 +10,7 @@
     use Dompdf\Options;
 
     $document_types = get_document_types(["incoming", "outgoing"]);
+    $date_range_text = "";
 
     // Generate report if filter is used
     if (!empty($_GET['category']) || !empty($_GET['document_type']) || !empty($_GET['date_received'])) {
@@ -49,6 +50,16 @@
                     ];
                 }
             }
+
+            if ($dateFrom === $dateTo) {
+                $date_range_text = "On " . date('F d, Y', strtotime($dateFrom));
+            } else {
+                $date_range_text = "From " . 
+                    date('F d, Y', strtotime($dateFrom)) . 
+                    " to " . 
+                    date('F d, Y', strtotime($dateTo));
+            }
+            
         }
 
         // Get documents
@@ -60,18 +71,6 @@
 
         $logoLeftData  = base64_encode(file_get_contents($logoLeft));
         $logoRightData = base64_encode(file_get_contents($logoRight));
-
-        $date_range_text = "";
-
-        if (!empty($_GET['date_received'])) {
-            $dates = explode(' - ', $_GET['date_received']);
-            $from = DateTime::createFromFormat('m/d/Y', trim($dates[0]));
-            $to   = DateTime::createFromFormat('m/d/Y', trim($dates[1]));
-
-            $date_range_text = date('F d, Y', strtotime($from->format('Y-m-d'))) . 
-                " - " . 
-                date('F d, Y', strtotime($to->format('Y-m-d')));
-        }
 
         // Build report HTML
         $html = '
@@ -142,7 +141,7 @@
                 </div>
                 <h2 class="report-title">List of Documents</h2>';
                 if(!empty($date_range_text)) {
-                    $html .= '<p><strong>From:</strong> '.$date_range_text.'</p>';
+                    $html .= '<p><strong>'.$date_range_text.'</strong></p>';
                 }
         $html .='</div>
         </div>
