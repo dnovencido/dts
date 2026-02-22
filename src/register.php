@@ -172,7 +172,7 @@
                     </div>
                 </div>
             </form>
-            <a href="login.php" class="text-center">I already have an account</a>
+            <a href="login" class="text-center">I already have an account</a>
             </div>
             <!-- /.form-box -->
         </div><!-- /.card -->

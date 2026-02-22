@@ -23,7 +23,7 @@ function send_mail($toEmail, $toName, $subject, $body)
         // $mail->Port       = 465;
         $mail->isSMTP();
         $mail->Host       = 'localhost'; // GoDaddy's internal relay
-        $mail->SMTPAuth   = false;                          // No login needed inside their network
+        $mail->SMTPAuth   = false;  // No login needed inside their network
         $mail->SMTPSecure = false;
         $mail->SMTPAutoTLS = false;
         $mail->Port       = 25;
