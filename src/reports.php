@@ -68,8 +68,8 @@
         $document_data = get_all_documents($filter, []);
         $documents = $document_data['result'] ?? [];
 
-        $logoLeft  = $_SERVER['DOCUMENT_ROOT'] . '/assets/images/coa.jpeg';
-        $logoRight = $_SERVER['DOCUMENT_ROOT'] . '/assets/images/dpwh.jpeg';
+        $logoLeft  = __DIR__ . '/assets/images/coa.jpeg';
+        $logoRight = __DIR__ . '/assets/images/dpwh.jpeg';
 
         $logoLeftData  = base64_encode(file_get_contents($logoLeft));
         $logoRightData = base64_encode(file_get_contents($logoRight));
