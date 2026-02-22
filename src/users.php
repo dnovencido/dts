@@ -32,7 +32,7 @@
 ?>
 
 <?php include 'layouts/_header.php'; ?>
-  <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
+  <body class="hold-transition sidebar-collapse sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
       <div class="wrapper">
         <div class="content-wrapper">
           <?php include 'layouts/_navbar.php'; ?>
