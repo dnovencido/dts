@@ -14,13 +14,19 @@ function send_mail($toEmail, $toName, $subject, $body)
 
         // $mail->SMTPDebug = 2;
         // SMTP Settings
+        // $mail->isSMTP();
+        // $mail->Host       = 'mail.coa-dts.site';
+        // $mail->SMTPAuth   = true;
+        // $mail->Username   = 'no-reply@coa-dts.site';
+        // $mail->Password   = 'noreply@2026';
+        // $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL
+        // $mail->Port       = 465;
         $mail->isSMTP();
-        $mail->Host       = 'mail.coa-dts.site';
-        $mail->SMTPAuth   = true;
-        $mail->Username   = 'no-reply@coa-dts.site';
-        $mail->Password   = 'noreply@2026';
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL
-        $mail->Port       = 465;
+        $mail->Host       = 'localhost'; // GoDaddy's internal relay
+        $mail->SMTPAuth   = false;                          // No login needed inside their network
+        $mail->SMTPSecure = false;
+        $mail->SMTPAutoTLS = false;
+        $mail->Port       = 25;
 
         // Email Headers
         $mail->setFrom('no-reply@coa-dts.site', 'Document Tracking System');
