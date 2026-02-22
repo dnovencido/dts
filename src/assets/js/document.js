@@ -2,17 +2,20 @@ $(function() {
 
     $('#document_type').select2( {
         placeholder: "--Select Document Type--",
+        width: '100%'
     });
 
     $('#concerned_division').select2( {
         placeholder: "--Select Concerned Division--",
         theme: "classic",
+        width: '100%'
     });
 
     $('#signatories').select2( {
         placeholder: "--Select Signatories--",
         theme: "classic",
-        tags: true
+        tags: true,
+        width: '100%'
     });
 
     const select = $('#signatories');
@@ -32,11 +35,13 @@ $(function() {
     $('#stakeholders').select2( {
         placeholder: "--Select Stakeholders--",
         theme: "classic",
-        multiple: true
+        multiple: true,
+        width: '100%'
     });
 
     $('#receiving_office').select2( {
         placeholder: "--Select Receiving Office--",
+        width: '100%'
     });
 
     
@@ -74,6 +79,7 @@ $(function() {
 
     $('#filing_location').select2( {
         placeholder: "--Select Filing Location--",
+        width: '100%'
     });
 
 });
