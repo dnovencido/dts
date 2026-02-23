@@ -12,7 +12,7 @@ function send_mail($toEmail, $toName, $subject, $body)
 
     try {
 
-        // $mail->SMTPDebug = 2;
+        $mail->SMTPDebug = 2;
         // SMTP Settings
         // $mail->isSMTP();
         // $mail->Host       = 'mail.coa-dts.site';
