@@ -3,7 +3,7 @@ const btnDelete = document.getElementsByClassName("btn-delete");
 for (let i=0; i<btnDelete.length; i++) {
     btnDelete[i].addEventListener("click", function(e) {
         e.preventDefault();
-        var result = confirm("Do you want to delete this dish?");
+        var result = confirm("Do you want to delete this item?");
         if(result) {
             var btn = this;
             var id = this.getAttribute("data-id");

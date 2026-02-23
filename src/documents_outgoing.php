@@ -221,7 +221,7 @@
                                         <td class="action-buttons">
                                             <a href="/documents/outgoing/view/<?= $value['id'] ?>" class="btn bg-gradient-info btn-sm"><i class="fa-solid fa-eye"></i></a>
                                             <a href="/documents/outgoing/edit/<?= $value['id'] ?>" class="btn bg-gradient-primary btn-sm"><i class="fa-solid fa-pencil"></i></a>
-                                            <a href="#" class="btn bg-gradient-danger btn-sm btn-delete" data-id="<?= $value['id'] ?>"><i class="fa-solid fa-trash"></i></a>
+                                            <a href="#" class="btn bg-gradient-danger btn-sm btn-delete" data-id="<?= $value['id'] ?>" data-url="/documents/delete"><i class="fa-solid fa-trash"></i></a>
                                         </td>
                                     </tr>
                                 <?php } ?>
