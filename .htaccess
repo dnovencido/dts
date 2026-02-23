@@ -1,13 +1,10 @@
 RewriteEngine On
 
-# If request is NOT already in /src
+# Set default homepage to src/index.php
+DirectoryIndex src/index.php
+
+# Internally route all non-existing files to /src
 RewriteCond %{REQUEST_URI} !^/src/
-
-# If request is not an existing file
 RewriteCond %{REQUEST_FILENAME} !-f
-
-# If request is not an existing directory
 RewriteCond %{REQUEST_FILENAME} !-d
-
-# Internally rewrite to /src
 RewriteRule ^(.*)$ src/$1 [L]
