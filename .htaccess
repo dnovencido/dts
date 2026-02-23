@@ -1,5 +1,13 @@
 RewriteEngine On
 
-# Redirect root domain to /src/
-RewriteCond %{REQUEST_URI} ^/$
-RewriteRule ^$ /src/ [R=301,L]
+# If request is NOT already in /src
+RewriteCond %{REQUEST_URI} !^/src/
+
+# If request is not an existing file
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# If request is not an existing directory
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Internally rewrite to /src
+RewriteRule ^(.*)$ src/$1 [L]
