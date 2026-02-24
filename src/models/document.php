@@ -118,6 +118,8 @@
             $data['date_received'] = null;
         }
 
+        $data['filing_location'] =  isset($data['filing_location']) && $data['filing_location'] !== '' ? (int)$data['filing_location'] : null;
+
         if ($id === null) {
             $data['date_created'] = date("Y-m-d H:i:s");
             $columns = array_keys($data);
@@ -150,6 +152,7 @@
 
             $stmt->bind_param($types, ...$values);
         }
+ 
  
         if($stmt->execute())
             $flag = true;
@@ -216,10 +219,10 @@
                 dt.name AS document_type_name,
                 r.name AS receiving_office_name
             FROM documents d
-LEFT JOIN categories c ON d.category = c.id
-LEFT JOIN document_types dt ON d.document_type = dt.id
-LEFT JOIN receiving_offices r ON d.receiving_office = r.id
-LEFT JOIN filing_locations f ON d.filing_location = f.id
+            LEFT JOIN categories c ON d.category = c.id
+            LEFT JOIN document_types dt ON d.document_type = dt.id
+            LEFT JOIN receiving_offices r ON d.receiving_office = r.id
+            LEFT JOIN filing_locations f ON d.filing_location = f.id
         ";
 
         $conditions = [];
@@ -402,11 +405,11 @@ LEFT JOIN filing_locations f ON d.filing_location = f.id
                     u.lname
                 ) AS emp_name,
             f.name as filing_location_name, dt.name AS `document_type_name`, r.name AS `receiving_office_name` FROM `documents` as d 
-            INNER JOIN `categories` as `c` ON d.category = c.id 
-            INNER JOIN `document_types` as `dt` ON d.document_type = dt.id 
-            INNER JOIN `filing_locations` as `f` ON d.filing_location = f.id
-            INNER JOIN `users` as `u` ON d.user_id = u.id
-            INNER JOIN receiving_offices r ON d.receiving_office = r.id WHERE d.id = ?";
+            LEFT JOIN `categories` as `c` ON d.category = c.id 
+            LEFT JOIN `document_types` as `dt` ON d.document_type = dt.id 
+            LEFT JOIN `filing_locations` as `f` ON d.filing_location = f.id
+            LEFT JOIN `users` as `u` ON d.user_id = u.id
+            LEFT JOIN receiving_offices r ON d.receiving_office = r.id WHERE d.id = ?";
 
         if ($stmt = $conn->prepare($query)) {
             $stmt->bind_param("i", $id);

@@ -37,16 +37,55 @@
             </div>
             <div class="form-group select-group">
                 <label for="concerned_division">Concerned Division</label>
-                <select id="concerned_division" class="form-control" name="concerned_division[]"  multiple="multiple">
+                    <select id="concerned_division" class="form-control" name="concerned_division[]"  multiple="multiple">
                     <option value="">-- Select Concerned Division --</option>
+                    <?php if(isset($_POST['concerned_division'])) { ?>
+                    <?php
+                        // Keep track of printed values
+                        $printed = [];
+                        /* =========================
+                        Print DB signatories first
+                        ========================= */
+                        foreach ($divisions['result'] as $division):
+                            $id   = (string) $division['id'];
+                            $name = $division['name'];
+                            $isSelected = in_array($id, $_POST['concerned_division'], true);
+                            // Mark as printed
+                            $printed[] = $id;
+                        ?>
+                            <option value="<?= htmlspecialchars($id, ENT_QUOTES) ?>"
+                                <?= $isSelected ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($name, ENT_QUOTES) ?>
+                            </option>
+                        <?php endforeach; ?>
+                        <?php
+                        /* =========================
+                        Print typed / custom values
+                        ========================= */
+                        foreach ($_POST['concerned_division'] as $val):
+                            // Skip if already printed (DB id)
+                            if (in_array((string)$val, $printed, true)) {
+                                continue;
+                            }
+                            // Skip empty values
+                            if (trim($val) === '') {
+                                continue;
+                            }
+                        ?>
+                            <option value="<?= htmlspecialchars($val, ENT_QUOTES) ?>" selected>
+                                <?= htmlspecialchars($val, ENT_QUOTES) ?>
+                            </option>
+                        <?php endforeach; ?>                        
+                    <?php } else {?>
                     <?php foreach ($divisions['result'] as $division): ?>
                         <option value="<?= htmlspecialchars($division['id'], ENT_QUOTES) ?>"
                             <?= in_array($division['id'], $_POST['concerned_division'] ?? []) ? 'selected' : '' ?>>
                             <?= htmlspecialchars($division['name'], ENT_QUOTES) ?>
                         </option>
-                    <?php endforeach; ?> 
-                </select>
-            </div>
+                    <?php endforeach; ?>
+                    <?php } ?>
+                    </select>
+                </div>
             <div class="form-group select-group">
                 <label for="stakeholders">Names of Stakeholders</label>
                 <select id="stakeholders" class="form-control" name="names_stakeholders[]"  multiple="multiple">

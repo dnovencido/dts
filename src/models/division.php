@@ -329,38 +329,66 @@
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
-    function get_division_names_by_ids(array $ids = []) {
+    function get_division_names_by_ids(array $values = []) {
         global $conn;
-        
-        if (empty($ids)) return [];
-        $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
-        $sql = "SELECT id, name, head
-                FROM divisions 
-                WHERE id IN ($placeholders)";
+        if (empty($values)) return [];
 
-        $stmt = $conn->prepare($sql);
+        $result_data = [];
 
-        $types = str_repeat('i', count($ids));
+        // Separate numeric IDs and plain strings
+        $numeric_ids = [];
+        $string_values = [];
 
-        $stmt->bind_param($types, ...$ids);
-
-        $stmt->execute();
-
-        $result = $stmt->get_result();
+        foreach ($values as $val) {
+            if (is_numeric($val)) {
+                $numeric_ids[] = (int)$val;
+            } else {
+                $string_values[] = $val; // retain as is
+            }
+        }
 
         $map = [];
 
-        while ($row = $result->fetch_assoc()) {
-            $map[$row['id']] = [
-                'name' => $row['name'],
-                'head' => $row['head']
-            ];
+        // Fetch only if there are numeric IDs
+        if (!empty($numeric_ids)) {
+
+            $placeholders = implode(',', array_fill(0, count($numeric_ids), '?'));
+
+            $sql = "SELECT id, name, head
+                    FROM divisions
+                    WHERE id IN ($placeholders)";
+
+            $stmt = $conn->prepare($sql);
+
+            $types = str_repeat('i', count($numeric_ids));
+            $stmt->bind_param($types, ...$numeric_ids);
+
+            $stmt->execute();
+            $query_result = $stmt->get_result();
+
+            while ($row = $query_result->fetch_assoc()) {
+                $map[$row['id']] = [
+                    'id'   => $row['id'],
+                    'name' => $row['name'],
+                    'head' => $row['head']
+                ];
+            }
+
+            $stmt->close();
         }
 
-        $stmt->close();
+        // Rebuild output preserving original order
+        foreach ($values as $val) {
+            if (is_numeric($val) && isset($map[(int)$val])) {
+                $result_data[] = $map[(int)$val];
+            } else {
+                // retain string or missing ID as-is
+                $result_data[] = $val;
+            }
+        }
 
-        return $map;
+        return $result_data;
     }
 
     function get_signatories($values) {

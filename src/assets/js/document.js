@@ -8,7 +8,8 @@ $(function() {
     $('#concerned_division').select2( {
         placeholder: "--Select Concerned Division--",
         theme: "classic",
-        width: '100%'
+        width: '100%',
+        tags: true
     });
 
     $('#signatories').select2( {

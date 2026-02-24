@@ -73,17 +73,30 @@
                                   <th class="table-light">Concerned Division</th>
                                     <?php
                                       $divisions = get_division_names_by_ids(
-                                        json_decode($document['concerned_division'], true)
+                                          json_decode($document['concerned_division'], true) ?? []
                                       );
-                                      $names = array_column($divisions, 'name');
-                                      $heads = array_column($divisions, 'head');
+
+                                      $names = [];
+                                      $heads = [];
+
+                                      foreach ($divisions as $item) {
+                                          if (is_array($item)) {
+                                              // From referenced table
+                                              $names[] = $item['name'] ?? '';
+                                              $heads[] = $item['head'] ?? '';
+                                          } else {
+                                              // Retain string as-is
+                                              $names[] = $item;
+                                          }
+                                      }
                                     ?>
-                                    <td>
-                                    <?= htmlspecialchars(implode(', ', $names)) ?>
-                                    </td>
+                                  <td>
+                                      <?= htmlspecialchars(implode(', ', array_filter($names))) ?>
                                   </td>
                                   <th class="table-light">Head Division</th>
-                                  <td><?= htmlspecialchars(implode(', ', $heads)) ?></td>
+                                  <td>
+                                      <?= htmlspecialchars(implode(', ', array_filter($heads))) ?>
+                                  </td>
                                 </tr>
                                 <tr>
                                   <th class="table-light">Stakeholder Names</th>
