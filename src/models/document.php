@@ -216,10 +216,10 @@
                 dt.name AS document_type_name,
                 r.name AS receiving_office_name
             FROM documents d
-            INNER JOIN categories c ON d.category = c.id
-            INNER JOIN document_types dt ON d.document_type = dt.id
-            INNER JOIN receiving_offices r ON d.receiving_office = r.id
-            INNER JOIN filing_locations f ON d.filing_location = f.id
+LEFT JOIN categories c ON d.category = c.id
+LEFT JOIN document_types dt ON d.document_type = dt.id
+LEFT JOIN receiving_offices r ON d.receiving_office = r.id
+LEFT JOIN filing_locations f ON d.filing_location = f.id
         ";
 
         $conditions = [];
@@ -502,7 +502,6 @@
 
         /* Status Filter (pending / received) */
         if (!empty($status)) {
-
             $conditions[] = "status = ?";
             $params[] = $status;
             $typesStr .= "s";
