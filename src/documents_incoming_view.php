@@ -101,6 +101,7 @@
                                 </tr>
                                 <tr>
                                   <th class="table-light">Encoded By</th>
+                                  <th class="table-light"><?= $document['category'] ?></th>
                                   <td colspan="2"><?= htmlspecialchars($document['emp_name'], ENT_QUOTES) ?></td>
                                   <th class="table-light">Location of Filing</th>
                                   <td colspan="2"><?= !empty($document['filing_location_name']) ? htmlspecialchars($document['filing_location_name'], ENT_QUOTES) : '-' ?></td>
