@@ -192,26 +192,40 @@
             'signatories'
         ];
 
+        /* =========================
+        SELECT ONLY NEEDED COLUMNS
+        (NO d.* and NO file BLOB)
+        ========================= */
         $query = "SELECT 
-                d.*, 
-                f.name AS filing_location_name,
-                c.name AS category_name, 
-                dt.name AS document_type_name,
-                r.name AS receiving_office_names
-            FROM documents d
-            INNER JOIN categories c ON d.category = c.id
-            INNER JOIN document_types dt ON d.document_type = dt.id
-            INNER JOIN receiving_offices r ON d.receiving_office = r.id
-            INNER JOIN filing_locations f ON d.filing_location = f.id";
+                    d.id,
+                    d.title,
+                    d.document_number,
+                    d.document_date,
+                    d.date_received,
+                    d.status,
+                    d.category,
+                    d.document_type,
+                    d.filing_location,
+                    f.name AS filing_location_name,
+                    c.name AS category_name, 
+                    dt.name AS document_type_name,
+                    r.name AS receiving_office_name
+                FROM documents d
+                INNER JOIN categories c ON d.category = c.id
+                INNER JOIN document_types dt ON d.document_type = dt.id
+                INNER JOIN receiving_offices r ON d.receiving_office = r.id
+                INNER JOIN filing_locations f ON d.filing_location = f.id";
+
         $conditions = [];
         $params = [];
         $types = "";
 
         /* =========================
-        Build Conditions
+        FILTERS
         ========================= */
         foreach ($filter as $key => $value) {
-            if($key === 'search' && is_array($value) && count($value) >= 2) {
+
+            if ($key === 'search' && is_array($value) && count($value) >= 2) {
                 $cols  = $value[0];
                 $input = trim($value[1]);
 
@@ -228,11 +242,10 @@
                         $conditions[] = "(" . implode(" OR ", $searchParts) . ")";
                     }
                 }
-
                 continue;
             }
 
-            if($key === 'date_range' && is_array($value) && count($value) >= 3) {
+            if ($key === 'date_range' && is_array($value) && count($value) >= 3) {
                 $column = $value[0][0];
                 $from   = trim($value[1]);
                 $to     = trim($value[2]);
@@ -242,129 +255,55 @@
                     $params[] = $from;
                     $params[] = $to;
                     $types .= "ss";
-
-                } elseif ($from !== '') {
-
-                    $conditions[] = "d.$column >= ?";
-                    $params[] = $from;
-                    $types .= "s";
-
-                } elseif ($to !== '') {
-
-                    $conditions[] = "d.$column <= ?";
-                    $params[] = $to;
-                    $types .= "s";
-                }
-
-                continue;
-            }
-
-            if($key === 'item' && is_array($value)) {
-                foreach ($value as $item) {
-                    if(!isset($item['column'], $item['value']) || $item['value'] === '') {
-                        continue;
-                    }
-
-                    $column = $item['column'];
-                    $input  = $item['value'];
-
-                    if(in_array($column, $json_columns)) {
-                        if (is_array($input)) {
-                            $jsonParts = [];
-
-                            foreach ($input as $val) {
-                                $jsonParts[] = "JSON_CONTAINS(d.$column, CAST(? AS JSON))";
-                                $params[] = json_encode((int)$val);
-                                $types  .= "s";
-                            }
-
-                            if ($jsonParts) {
-                                $conditions[] = "(" . implode(" OR ", $jsonParts) . ")";
-                            }
-                        } else {
-                            $conditions[] = "JSON_CONTAINS(d.$column, CAST(? AS JSON))";
-
-                            $params[] = json_encode((int)$input);
-                            $types  .= "s";
-                        }
-
-                        continue;
-                    }
-                    if(is_array($input)) {
-                        $input = array_map('intval', $input);
-                        $input = array_filter($input);
-
-                        if(!empty($input)) {
-                            $placeholders = implode(',', array_fill(0, count($input), '?'));
-
-                            $conditions[] = "d.$column IN ($placeholders)";
-
-                            foreach ($input as $id) {
-                                $params[] = $id;
-                                $types  .= "i";
-                            }
-                        }
-                    } else {
-                        $conditions[] = "d.$column = ?";
-
-                        $params[] = $input;
-
-                        $types .= is_numeric($input) ? "i" : "s";
-                    }
                 }
                 continue;
             }
         }
 
-        if(!empty($conditions)) {
+        if (!empty($conditions)) {
             $query .= " WHERE " . implode(" AND ", $conditions);
         }
 
+        /* =========================
+        COUNT QUERY
+        ========================= */
         $count_query = "SELECT COUNT(*) AS total FROM (" . $query . ") AS total_records";
 
         $stmt = $conn->prepare($count_query);
 
-        if($stmt === false) {
-            throw new Exception("Prepare failed (COUNT): " . $conn->error);
-        }
-
-        if(!empty($params)) {
+        if (!empty($params)) {
             $stmt->bind_param($types, ...$params);
         }
 
         $stmt->execute();
-
         $count_result = $stmt->get_result()->fetch_assoc();
-
         $documents['total'] = $count_result['total'] ?? 0;
-
         $stmt->close();
 
-        $query .= " ORDER BY d.id DESC";
+        /* =========================
+        FORCE PAGINATION
+        ========================= */
+        $limit  = $pagination['total_records_per_page'] ?? 20;
+        $offset = $pagination['offset'] ?? 0;
 
-        if(!empty($pagination)) {
-            $query .= " LIMIT ?, ?";
-            $params[] = (int)$pagination['offset'];
-            $params[] = (int)$pagination['total_records_per_page'];
-
-            $types .= "ii";
-        }
+        $query .= " ORDER BY d.id DESC LIMIT ?, ?";
+        $params[] = (int)$offset;
+        $params[] = (int)$limit;
+        $types .= "ii";
 
         $stmt = $conn->prepare($query);
-
-        if($stmt === false) {
-            throw new Exception("Prepare failed (MAIN): " . $conn->error);
-        }
-
-        if(!empty($params)) {
-            $stmt->bind_param($types, ...$params);
-        }
-
+        $stmt->bind_param($types, ...$params);
         $stmt->execute();
 
         $result = $stmt->get_result();
 
-        $documents['result'] = $result->fetch_all(MYSQLI_ASSOC);
+        /* =========================
+        FETCH ROW BY ROW
+        (NO fetch_all)
+        ========================= */
+        while ($row = $result->fetch_assoc()) {
+            $documents['result'][] = $row;
+        }
 
         $stmt->close();
 
