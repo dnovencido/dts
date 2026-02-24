@@ -182,9 +182,13 @@
     }
     
     function get_all_documents($filter = [], $pagination = []) {
+
         global $conn;
 
-        $documents = ['total' => 0, 'result' => []];
+        $documents = [
+            'total'  => 0,
+            'result' => []
+        ];
 
         $json_columns = [
             'concerned_division',
@@ -192,104 +196,185 @@
             'signatories'
         ];
 
-        /* =========================
-        SELECT ONLY NEEDED COLUMNS
-        (NO d.* and NO file BLOB)
-        ========================= */
-        $query = "SELECT 
-                    d.id,
-                    d.title,
-                    d.document_number,
-                    d.document_date,
-                    d.date_received,
-                    d.status,
-                    d.category,
-                    d.document_type,
-                    d.filing_location,
-                    f.name AS filing_location_name,
-                    c.name AS category_name, 
-                    dt.name AS document_type_name,
-                    r.name AS receiving_office_name
-                FROM documents d
-                INNER JOIN categories c ON d.category = c.id
-                INNER JOIN document_types dt ON d.document_type = dt.id
-                INNER JOIN receiving_offices r ON d.receiving_office = r.id
-                INNER JOIN filing_locations f ON d.filing_location = f.id";
+        /* =========================================
+        SELECT ONLY NEEDED COLUMNS (NO d.*)
+        DO NOT LOAD FILE BLOB
+        ========================================= */
+        $query = "
+            SELECT 
+                d.id,
+                d.title,
+                d.document_number,
+                d.document_date,
+                d.date_received,
+                d.status,
+                d.category,
+                d.document_type,
+                d.filing_location,
+                f.name AS filing_location_name,
+                c.name AS category_name, 
+                dt.name AS document_type_name,
+                r.name AS receiving_office_name
+            FROM documents d
+            INNER JOIN categories c ON d.category = c.id
+            INNER JOIN document_types dt ON d.document_type = dt.id
+            INNER JOIN receiving_offices r ON d.receiving_office = r.id
+            INNER JOIN filing_locations f ON d.filing_location = f.id
+        ";
 
         $conditions = [];
-        $params = [];
-        $types = "";
+        $params     = [];
+        $types      = "";
 
-        /* =========================
-        FILTERS
-        ========================= */
+        /* =========================================
+        BUILD FILTERS
+        ========================================= */
         foreach ($filter as $key => $value) {
 
+            /* ---------- SEARCH ---------- */
             if ($key === 'search' && is_array($value) && count($value) >= 2) {
-                $cols  = $value[0];
-                $input = trim($value[1]);
+
+                $columns = $value[0];
+                $input   = trim($value[1]);
 
                 if ($input !== '') {
+
                     $searchParts = [];
 
-                    foreach ($cols as $col) {
-                        $searchParts[] = "$col LIKE ?";
+                    foreach ($columns as $col) {
+                        $searchParts[] = "d.$col LIKE ?";
                         $params[] = "%$input%";
-                        $types .= "s";
+                        $types   .= "s";
                     }
 
-                    if ($searchParts) {
+                    if (!empty($searchParts)) {
                         $conditions[] = "(" . implode(" OR ", $searchParts) . ")";
                     }
                 }
+
                 continue;
             }
 
+            /* ---------- DATE RANGE ---------- */
             if ($key === 'date_range' && is_array($value) && count($value) >= 3) {
+
                 $column = $value[0][0];
                 $from   = trim($value[1]);
                 $to     = trim($value[2]);
 
-                if ($from !== '' && $to !== '') {
+                if ($from && $to) {
                     $conditions[] = "d.$column BETWEEN ? AND ?";
                     $params[] = $from;
                     $params[] = $to;
-                    $types .= "ss";
+                    $types   .= "ss";
+                } elseif ($from) {
+                    $conditions[] = "d.$column >= ?";
+                    $params[] = $from;
+                    $types   .= "s";
+                } elseif ($to) {
+                    $conditions[] = "d.$column <= ?";
+                    $params[] = $to;
+                    $types   .= "s";
                 }
+
+                continue;
+            }
+
+            /* ---------- ITEM FILTER ---------- */
+            if ($key === 'item' && is_array($value)) {
+
+                foreach ($value as $item) {
+
+                    if (!isset($item['column'], $item['value']) || $item['value'] === '') {
+                        continue;
+                    }
+
+                    $column = $item['column'];
+                    $input  = $item['value'];
+
+                    /* JSON COLUMN FILTER */
+                    if (in_array($column, $json_columns)) {
+
+                        if (is_array($input)) {
+
+                            $jsonParts = [];
+
+                            foreach ($input as $val) {
+                                $jsonParts[] = "JSON_CONTAINS(d.$column, CAST(? AS JSON))";
+                                $params[] = json_encode((int)$val);
+                                $types   .= "s";
+                            }
+
+                            if (!empty($jsonParts)) {
+                                $conditions[] = "(" . implode(" OR ", $jsonParts) . ")";
+                            }
+
+                        } else {
+
+                            $conditions[] = "JSON_CONTAINS(d.$column, CAST(? AS JSON))";
+                            $params[] = json_encode((int)$input);
+                            $types   .= "s";
+                        }
+
+                        continue;
+                    }
+
+                    /* NORMAL COLUMN FILTER */
+                    if (is_array($input)) {
+
+                        $placeholders = implode(',', array_fill(0, count($input), '?'));
+                        $conditions[] = "d.$column IN ($placeholders)";
+
+                        foreach ($input as $val) {
+                            $params[] = $val;
+                            $types   .= is_numeric($val) ? "i" : "s";
+                        }
+
+                    } else {
+
+                        $conditions[] = "d.$column = ?";
+                        $params[] = $input;
+                        $types   .= is_numeric($input) ? "i" : "s";
+                    }
+                }
+
                 continue;
             }
         }
 
+        /* =========================================
+        APPLY WHERE
+        ========================================= */
         if (!empty($conditions)) {
             $query .= " WHERE " . implode(" AND ", $conditions);
         }
 
-        /* =========================
-        COUNT QUERY
-        ========================= */
-        $count_query = "SELECT COUNT(*) AS total FROM (" . $query . ") AS total_records";
+        /* =========================================
+        COUNT TOTAL (SAFE)
+        ========================================= */
+        $countQuery = "SELECT COUNT(*) AS total FROM ($query) AS total_records";
 
-        $stmt = $conn->prepare($count_query);
+        $stmt = $conn->prepare($countQuery);
 
         if (!empty($params)) {
             $stmt->bind_param($types, ...$params);
         }
 
         $stmt->execute();
-        $count_result = $stmt->get_result()->fetch_assoc();
-        $documents['total'] = $count_result['total'] ?? 0;
+        $countResult = $stmt->get_result()->fetch_assoc();
+        $documents['total'] = $countResult['total'] ?? 0;
         $stmt->close();
 
-        /* =========================
-        FORCE PAGINATION
-        ========================= */
+        /* =========================================
+        FORCE PAGINATION (ALWAYS)
+        ========================================= */
         $limit  = $pagination['total_records_per_page'] ?? 20;
         $offset = $pagination['offset'] ?? 0;
 
         $query .= " ORDER BY d.id DESC LIMIT ?, ?";
         $params[] = (int)$offset;
         $params[] = (int)$limit;
-        $types .= "ii";
+        $types   .= "ii";
 
         $stmt = $conn->prepare($query);
         $stmt->bind_param($types, ...$params);
@@ -297,10 +382,6 @@
 
         $result = $stmt->get_result();
 
-        /* =========================
-        FETCH ROW BY ROW
-        (NO fetch_all)
-        ========================= */
         while ($row = $result->fetch_assoc()) {
             $documents['result'][] = $row;
         }
