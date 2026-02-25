@@ -123,10 +123,10 @@
                                 </option>
                             <?php endforeach; ?>                        
                         <?php } else {?>
-                        <?php foreach ($divisions['result'] as $division): ?>
-                            <option value="<?= htmlspecialchars($division['id'], ENT_QUOTES) ?>"
-                                <?= in_array($division['id'], $_POST['concerned_division'] ?? []) ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($division['name'], ENT_QUOTES) ?>
+                        <?php foreach ($stakeholders['result'] as $stakeholder): ?>
+                            <option value="<?= htmlspecialchars($stakeholder['id'], ENT_QUOTES) ?>"
+                                <?= in_array($stakeholder['id'], $_POST['concerned_division'] ?? []) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($stakeholder['name'], ENT_QUOTES) ?>
                             </option>
                     <?php endforeach; ?>
                     <?php } ?>
