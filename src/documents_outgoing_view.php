@@ -48,7 +48,7 @@
                         <h4 class="card-title">Document Information</h3>
                         <div class="card-tools float-right">
                             <a href="/documents/outgoing/edit/<?= $document['id'] ?>" class="btn bg-gradient-primary btn-sm"><i class="fa-solid fa-pencil"></i></a>
-                            <a href="#" class="btn bg-gradient-danger btn-sm" data-id="<?= $document['id'] ?>"><i class="fa-solid fa-trash"></i></a>
+                            <a href="#" class="btn bg-gradient-danger btn-sm btn-delete" data-id="<?= $document['id'] ?>" data-category="outgoing" data-url="/documents/delete"><i class="fa-solid fa-trash"></i></a>
                         </div>
                       </div>
                       <!-- /.card-header -->
