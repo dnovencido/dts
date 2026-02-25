@@ -37,6 +37,7 @@ $(function() {
         placeholder: "--Select Stakeholders--",
         theme: "classic",
         multiple: true,
+        tags: true,
         width: '100%'
     });
 

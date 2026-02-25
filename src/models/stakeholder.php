@@ -167,62 +167,74 @@
     function get_stakeholders($values) {
         global $conn;
 
-        if(!is_array($values) || empty($values)) {
+        if (!is_array($values) || empty($values)) {
             return [];
         }
 
-        $ids = array_filter(
-            array_map('intval', $values),
-            fn($v) => $v > 0
-        );
+        $numeric_ids = [];
+        $custom_values = [];
 
-        if (empty($ids)) {
-            return [];
+        // Separate IDs and Custom Strings
+        foreach ($values as $val) {
+            if (is_numeric($val) && (int)$val > 0) {
+                $numeric_ids[] = (int)$val;
+            } else {
+                if (trim((string)$val) !== '') {
+                    $custom_values[] = (string)$val;
+                }
+            }
         }
 
-        $ids = array_values(array_unique($ids));
-
-        $placeholders = implode(',', array_fill(0, count($ids), '?'));
-
-        $sql = "
-            SELECT id, name
-            FROM stakeholders
-            WHERE id IN ($placeholders)
-        ";
-
-        $stmt = $conn->prepare($sql);
-
-        if ($stmt === false) {
-            error_log("Prepare failed in get_all_stakeholders: " . $conn->error);
-            return [];
-        }
-
-        $types = str_repeat('i', count($ids));
-
-        $stmt->bind_param($types, ...$ids);
-
-        if (!$stmt->execute()) {
-            error_log("Execute failed in get_all_stakeholders: " . $stmt->error);
-            return [];
-        }
-
-        $result = $stmt->get_result();
+        $numeric_ids = array_values(array_unique($numeric_ids));
 
         $map = [];
 
-        while ($row = $result->fetch_assoc()) {
+        // Fetch DB Names (if IDs exist)
+        if (!empty($numeric_ids)) {
 
-            $map[$row['id']] = $row['name'];
+            $placeholders = implode(',', array_fill(0, count($numeric_ids), '?'));
+
+            $sql = "
+                SELECT id, name
+                FROM stakeholders
+                WHERE id IN ($placeholders)
+            ";
+
+            $stmt = $conn->prepare($sql);
+
+            if ($stmt === false) {
+                error_log("Prepare failed in get_stakeholders: " . $conn->error);
+                return $custom_values; // return strings at least
+            }
+
+            $types = str_repeat('i', count($numeric_ids));
+            $stmt->bind_param($types, ...$numeric_ids);
+
+            if (!$stmt->execute()) {
+                error_log("Execute failed in get_stakeholders: " . $stmt->error);
+                $stmt->close();
+                return $custom_values;
+            }
+
+            $result = $stmt->get_result();
+
+            while ($row = $result->fetch_assoc()) {
+                $map[$row['id']] = $row['name'];
+            }
+
+            $stmt->close();
         }
 
-        $stmt->close();
-
+        // Rebuild Output (Preserve Order)
+        
         $output = [];
 
-        foreach ($ids as $id) {
+        foreach ($values as $val) {
 
-            if (!empty($map[$id])) {
-                $output[] = $map[$id];
+            if (is_numeric($val) && isset($map[(int)$val])) {
+                $output[] = $map[(int)$val];
+            } elseif (!is_numeric($val) && trim((string)$val) !== '') {
+                $output[] = (string)$val;
             }
         }
 
