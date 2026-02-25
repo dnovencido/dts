@@ -8,12 +8,17 @@
   include "session.php"; 
   include "require_login.php"; 
   include "require_role.php"; 
+  include "check_resource.php";
 
     require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee'], 'outgoing document management');
 
     $errors = [];
     if(array_key_exists("id", $_GET)) {
       $document = view_document($_GET['id']);
+      
+      if (!$document)
+        abort_404("Document does not exist.", "/documents/outgoing");
+      
       $document_id = $document['id'];
       $document_types = get_document_types(["outgoing"]);
       $divisions = get_all_divisions();

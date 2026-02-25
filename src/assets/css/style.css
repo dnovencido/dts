@@ -147,3 +147,9 @@ th.table-light {
     flex-direction: column;
     flex: 1 1 auto;
 }
+
+
+.error-page > .error-content {
+  display: block;
+  margin-left: 90px;
+}
