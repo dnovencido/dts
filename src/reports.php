@@ -12,7 +12,7 @@
     use Dompdf\Options;
 
     $document_types = get_document_types(["incoming", "outgoing"]);
-    $date_range_text = "";
+    $date_range_text = "ALL Documents";
 
     // Generate report if filter is used
     if (!empty($_GET['category']) || !empty($_GET['document_type']) || !empty($_GET['date_received'])) {
