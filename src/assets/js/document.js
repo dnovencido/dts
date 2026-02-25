@@ -84,4 +84,51 @@ $(function() {
         width: '100%'
     });
 
+    const uploadContainer = document.getElementById('uploadContainer');
+    const fileInput = document.getElementById('fileInput');
+    const previewContainer = document.getElementById('previewContainer');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    uploadContainer.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', function () {
+        const file = this.files[0];
+
+        if (!file) return;
+
+        previewContainer.innerHTML = '';
+        previewContainer.classList.remove('d-none');
+        uploadPlaceholder.classList.add('d-none');
+
+        const fileType = file.type;
+
+        // Image Preview
+        if (fileType.startsWith('image/')) {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.className = 'img-fluid rounded mt-2';
+            img.style.maxHeight = '250px';
+            previewContainer.appendChild(img);
+        }
+
+        // PDF Preview
+        else if (fileType === 'application/pdf') {
+            const embed = document.createElement('embed');
+            embed.src = URL.createObjectURL(file);
+            embed.type = 'application/pdf';
+            embed.width = '100%';
+            embed.height = '400px';
+            embed.className = 'mt-2 rounded';
+            previewContainer.appendChild(embed);
+        }
+
+        // Other Files
+        else {
+            previewContainer.innerHTML =
+                `<div class="alert alert-info mt-2">
+                    <i class="fa-solid fa-file"></i> ${file.name}
+                </div>`;
+        }
+    });
+
+
 });

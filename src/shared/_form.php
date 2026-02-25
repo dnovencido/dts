@@ -192,20 +192,41 @@
                 </select>
             </div>
             <div class="form-group">
-                <input type="file" name="file" />
-                <?php if (!empty($document['file'])): ?>
-                <!-- File Preview Link -->
-                <div class="mt-3">
-                    <label for="file">Document</label>
-                    <p>
-                        <a href="/view_file.php?id=<?= htmlspecialchars($document_id, ENT_QUOTES) ?>"
-                            target="_blank"
-                            class="btn btn-outline-primary">
-                            <i class="fa-solid fa-file"></i> <?= htmlspecialchars($document['file_name'], ENT_QUOTES) ?>
-                        </a>
-                    </p>
+
+                <label for="file" class="form-label fw-semibold">Upload Document</label>
+
+                <div class="border rounded p-4 text-center bg-light position-relative" id="uploadContainer">
+
+                    <input type="file"
+                        name="file"
+                        id="fileInput"
+                        class="form-control d-none"
+                        accept=".pdf,image/*">
+
+                    <div id="uploadPlaceholder">
+                        <i class="fa-solid fa-cloud-arrow-up fa-2x text-secondary mb-2"></i>
+                        <p class="mb-1">Click to upload or drag and drop</p>
+                        <small class="text-muted">PDF or Image files</small>
+                    </div>
+
+                    <div id="previewContainer" class="d-none mt-3"></div>
+
                 </div>
+
+                <?php if (!empty($document['file'])): ?>
+                    <div class="mt-3">
+                        <label class="form-label fw-semibold">Current File</label>
+                        <p>
+                            <a href="/view_file.php?id=<?= htmlspecialchars($document_id, ENT_QUOTES) ?>"
+                            target="_blank"
+                            class="btn btn-outline-primary btn-sm">
+                                <i class="fa-solid fa-file"></i>
+                                <?= htmlspecialchars($document['file_name'], ENT_QUOTES) ?>
+                            </a>
+                        </p>
+                    </div>
                 <?php endif; ?>
+
             </div>
             <div class="form-group">
                 <label>Status</label>
