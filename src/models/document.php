@@ -837,4 +837,16 @@
         return $data;
     }
 
+    function get_category_id($name) {
+        global $conn;
+
+        $stmt = $conn->prepare("SELECT id FROM categories WHERE name = ?");
+        $stmt->bind_param("s", $name);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        return $result['id'] ?? null;
+    }
+
 ?>

@@ -94,8 +94,11 @@
                                 }
                             ?>
                             <div class="col-md-6 col-lg-4">
-                                <a href="/documents/incoming/view/<?= $doc['id'] ?>"
-                                    class="text-decoration-none text-dark">
+                                <?php if($doc['category'] === get_category_id("incoming")) { ?>
+                                    <a href="/documents/incoming/view/<?= $doc['id'] ?>" class="text-decoration-none text-dark">
+                                <?php } else { ?>
+                                    <a href="/documents/outgoing/view/<?= $doc['id'] ?>" class="text-decoration-none text-dark">
+                                <?php } ?>
                                     <div class="card ripple-card card-result shadow-sm document-card border-left-<?= $border_color ?>">
                                         <div class="card-body">
                                             <div class="d-flex align-items-center">
@@ -111,6 +114,7 @@
                                                         </h6>
                                                         <span class="badge bg-<?= $doc['status'] ?? 'secondary' ?>">
                                                             <?= ucfirst(strtolower(htmlspecialchars($doc['status']))) ?>
+                                                        </span>
                                                     </div>
                                                     <p class="text-muted mb-1">
                                                         <?= date('M d, Y', strtotime($doc['document_date'])) ?>
@@ -154,6 +158,7 @@
       </div>
     <?php include 'shared/_scripts.php'; ?>
     <script>
+
     </script>
   </body>
 <?php include 'layouts/_footer.php'; ?>
