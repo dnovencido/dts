@@ -119,11 +119,13 @@
                                 </tr>
                                 <tr>
                                   <th class="table-light">Encoded By</th>
-                                  <td colspan="2"><?= htmlspecialchars($document['emp_name'], ENT_QUOTES) ?></td>
+                                  <td><?= htmlspecialchars($document['emp_name'], ENT_QUOTES) ?></td>
+                                  <th class="table-light">Date Encoded</th>
+                                  <td><?= !empty($document['date_created']) ? date('M d, Y', strtotime($document['date_created'])) : '-' ?></td>
                                   <th class="table-light">Location of Filing</th>
-                                  <td colspan="2"><?= !empty($document['filing_location_name']) ? htmlspecialchars($document['filing_location_name'], ENT_QUOTES) : '-' ?></td>
+                                  <td ><?= !empty($document['filing_location_name']) ? htmlspecialchars($document['filing_location_name'], ENT_QUOTES) : '-' ?></td>
                                   <th class="table-light">Status</th>
-                                  <td colspan="2"><?= !empty($document['status']) ? ucfirst(strtolower(htmlspecialchars($document['status'], ENT_QUOTES))) : '-' ?></td>
+                                  <td ><?= !empty($document['status']) ? ucfirst(strtolower(htmlspecialchars($document['status'], ENT_QUOTES))) : '-' ?></td>
                                 </tr>
                               </tbody>
                             </table>
