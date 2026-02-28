@@ -37,7 +37,7 @@
                   <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                       <li class="breadcrumb-item"><a href="/documents/outgoing">Outgoing</a></li>
-                      <li class="breadcrumb-item active"><?= $document['title'] ?></li>
+                      <li class="breadcrumb-item active"><?= htmlspecialchars(substr($document['title'], 0, 30), ENT_QUOTES) ?><?= strlen($document['title']) > 30 ? '...' : '' ?></li>
                     </ol>
                   </div>
                 </div>

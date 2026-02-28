@@ -32,12 +32,12 @@
                 <?php } ?>
                 <div class="row m-2">
                   <div class="col-sm-6">
-                    <h1><?= $document['title'] ?></h1>
+                    <h1 class="text-truncate"><?= $document['title'] ?></h1>
                   </div>
                   <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                       <li class="breadcrumb-item"><a href="/documents/incoming">Incoming</a></li>
-                      <li class="breadcrumb-item active"><?= $document['title'] ?></li>
+                      <li class="breadcrumb-item active"><?= htmlspecialchars(substr($document['title'], 0, 30), ENT_QUOTES) ?><?= strlen($document['title']) > 30 ? '...' : '' ?></li>
                     </ol>
                   </div>
                 </div>
@@ -50,7 +50,7 @@
                   <div class="col-md-12">
                     <div class="card">
                         <div class="card-header">
-                        <h4 class="card-title">Document Information</h3>
+                        <h4 class="card-title">Document Information</h4>
                         <div class="card-tools float-right">
                             <a href="/documents/incoming/edit/<?= $document['id'] ?>" class="btn bg-gradient-primary btn-sm"><i class="fa-solid fa-pencil"></i></a>
                             <a href="#" class="btn bg-gradient-danger btn-sm btn-delete" data-id="<?= $document['id'] ?>" data-category="incoming" data-url="/documents/delete"><i class="fa-solid fa-trash"></i></a>
