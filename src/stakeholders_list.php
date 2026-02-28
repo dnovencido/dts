@@ -28,6 +28,7 @@
   $stakeholders = $stakeholder_data['result'] ?? [];
   $total_records = $stakeholder_data['total'] ?? 0;
 
+  $current_page = isset($_GET['page_no']) ? (int)$_GET['page_no'] : 1;
   $pagy = pagination($total_records, $page_no); // setup pagination
   $modal_title = "Stakeholder Details";
 ?>
@@ -105,7 +106,8 @@
                             <?php if(!empty($stakeholders)) { ?>
                               <?php foreach($stakeholders as $key => $value ) { ?>
                                   <tr>
-                                      <td><?= ++$key ?></td>
+                                      <?php $start = ($current_page - 1) * TOTAL_RECORDS_PER_PAGE?>
+                                      <td><?= $start + ++$key ?></td>
                                       <td><?= $value['name'] ?></td>
                                         <td> <?= empty($value['last_updated']) ? 'N/A' : date('M d, Y g:i A', strtotime($value['last_updated'])) ?></td>
                                       <td><?= date('M d, Y @ h:i a', strtotime($value['date_created'])) ?></td>

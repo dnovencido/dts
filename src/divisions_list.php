@@ -28,6 +28,7 @@
   $divisions = $division_data['result'] ?? [];
   $total_records = $division_data['total'] ?? 0;
 
+  $current_page = isset($_GET['page_no']) ? (int)$_GET['page_no'] : 1;
   $pagy = pagination($total_records, $page_no); // setup pagination
   $modal_title = "Division Details";
 ?>
@@ -106,7 +107,8 @@
                             <?php if(!empty($divisions)) { ?>
                               <?php foreach($divisions as $key => $value ) { ?>
                                   <tr>
-                                      <td><?= ++$key ?></td>
+                                      <?php $start = ($current_page - 1) * TOTAL_RECORDS_PER_PAGE?>
+                                      <td><?= $start + ++$key ?></td>
                                       <td><?= $value['name'] ?></td>
                                       <td><?= $value['head'] ?></td>
                                         <td> <?= empty($division['last_updated']) ? 'N/A' : date('M d, Y g:i A', strtotime($division['last_updated'])) ?></td>

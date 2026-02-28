@@ -12,21 +12,21 @@
 
   $filter = [];
 
-  if (isset($_GET['query']) && $_GET['query'] !== '') {
+  if(isset($_GET['query']) && $_GET['query'] !== '') {
     $filter['search'] = [
       ['title', 'document_number'],
       $_GET['query']
     ];
   }
 
-  if (!empty($_GET['document_type'])) {
+  if(!empty($_GET['document_type'])) {
     $filter['item'][] = [
       'column' => 'document_type',
       'value'  => $_GET['document_type']
     ];
   }
 
-  if (!empty($_GET['status'])) {
+  if(!empty($_GET['status'])) {
     $filter['item'][] = [
       'column' => 'status',
       'value'  => $_GET['status']
@@ -40,7 +40,7 @@
   ];
   
   // Date Received
-  if (!empty($_GET['date_received'])) {
+  if(!empty($_GET['date_received'])) {
     $range = $_GET['date_received'];
     $dates = explode(' - ', $range);
 
@@ -61,7 +61,7 @@
 
   $config = $status_config[$type] ?? ['options' => []];
 
-  if (isset($_GET['page_no'])) {
+  if(isset($_GET['page_no'])) {
     $page_no = $_GET['page_no'];
   } else {
     $page_no = 1;
@@ -74,6 +74,7 @@
   $documents = $document_data['result'] ?? [];
   $total_records = $document_data['total'] ?? 0;
 
+  $current_page = isset($_GET['page_no']) ? (int)$_GET['page_no'] : 1;
   $pagy = pagination($total_records, $page_no); // setup pagination
 ?>
 <?php include 'layouts/_header.php'; ?>
@@ -211,7 +212,8 @@
                               <?php if(!empty($documents)) { ?>
                                 <?php foreach($documents as $key => $value ) { ?>
                                     <tr>
-                                        <td><?= ++$key ?></td>
+                                        <?php $start = ($current_page - 1) * TOTAL_RECORDS_PER_PAGE?>
+                                        <td><?= $start + ++$key ?></td>
                                         <td><?= $value['title'] ?></td>
                                         <td><?= $value['document_type_name'] ?></td>
                                         <td><?= $value['document_number'] ?></td>
