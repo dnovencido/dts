@@ -144,7 +144,7 @@
                               </div>
                             </div>
                             <div class="col-md-3">
-                              <div class="form-group">
+                              <div class="form-group select-group">
                                 <label for="document_type">Document Type</label>
                                 <select name="document_type" id="document_type" class="form-control">
                                   <option value="">-- Select Document Type --</option>

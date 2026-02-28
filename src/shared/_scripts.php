@@ -11,5 +11,7 @@
 <script src="/assets/plugins/daterange/daterangepicker.min.js"></script>
 <!-- ModalJS -->
 <script src="/assets/js/modal.js"></script>
+<!-- Search -->
+<script src="/assets/js/search.js"></script>
 <!-- Util -->
 <script src="/assets/js/util.js"></script>

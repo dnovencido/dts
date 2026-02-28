@@ -215,6 +215,7 @@
                 d.document_type,
                 d.filing_location,
                 f.name AS filing_location_name,
+                d.file_type,
                 c.name AS category_name, 
                 dt.name AS document_type_name,
                 r.name AS receiving_office_name
