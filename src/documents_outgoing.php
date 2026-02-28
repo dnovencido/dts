@@ -214,7 +214,7 @@
                                     <tr>
                                         <?php $start = ($current_page - 1) * TOTAL_RECORDS_PER_PAGE?>
                                         <td><?= $start + ++$key ?></td>
-                                        <td><?= $value['title'] ?></td>
+                                        <td><?= htmlspecialchars(substr($value['title'], 0, 70), ENT_QUOTES) ?><?= strlen($value['title']) > 70 ? '...' : '' ?></td>
                                         <td><?= $value['document_type_name'] ?></td>
                                         <td><?= $value['document_number'] ?></td>
                                         <td><?= date('M d, Y @ h:i a', strtotime($value['document_date'])) ?></td>
