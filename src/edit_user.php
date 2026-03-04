@@ -1,42 +1,84 @@
 <?php
-  include "db/db.php"; 
-  include "models/user.php";
-  include "models/roles.php";
-  include "models/user_role.php";
-  include "session.php"; 
-  include "require_login.php";
+include "db/db.php";
+include "models/user.php";
+include "models/roles.php";
+include "models/user_role.php";
+include "models/assigned_office.php";
+include "session.php";
+include "require_login.php";
 
-  if (!isset($_GET['id'])) {
-    die("No user selected");
-  }
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    die("Invalid user selected.");
+}
 
-  $user_id = (int)$_GET['id'];
+$user_id = (int) $_GET['id'];
 
-  if(isset($_POST['submit'])) {
-    $role_id = (int)$_POST['role_id'];
-    $is_verified = isset($_POST['is_verified']) ? 1 : 0;
-    if(update_profile($user_id, $_POST['fname'], $_POST['mname'], $_POST['lname'], $_POST['employee_id'],  $_POST['email'], $_POST['position'], $_POST['password'], $is_verified) && update_user_role($user_id, $role_id)) {
-      $_SESSION['flash_message'] = [
-        'type' => 'success',
-        'text' => 'You have successfully updated a user.'
-      ];
-      header("Location: users.php?success=role_updated");
-      exit;
+/* ----------------------------
+   FETCH USER DATA
+-----------------------------*/
+$stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$user = $stmt->get_result()->fetch_assoc();
+
+if (!$user) {
+    die("User not found.");
+}
+
+$current_office   = get_assigned_office($user_id);
+$roles            = get_all_roles();
+
+
+$current_role_id  = $current_role_ids[0] ?? '';
+$assigned_offices = get_all_assigned_offices();
+$current_office_id = $current_office ? $current_office : '';
+
+/* ----------------------------
+   HANDLE FORM SUBMIT
+-----------------------------*/
+if (isset($_POST['submit'])) {
+
+    $fname            = trim($_POST['fname']);
+    $mname            = trim($_POST['mname']);
+    $lname            = trim($_POST['lname']);
+    $employee_id      = trim($_POST['employee_id']);
+    $email            = trim($_POST['email']);
+    $position         = trim($_POST['position']);
+    $password         = $_POST['password'];
+    $role_id          = (int) $_POST['role_id'];
+    $assigned_office  = trim($_POST['assigned_office']);
+    $is_verified      = isset($_POST['is_verified']) ? 1 : 0;
+
+    $update_user   = update_profile(
+        $user_id,
+        $fname,
+        $mname,
+        $lname,
+        $employee_id,
+        $email,
+        $position,
+        $password,
+        $is_verified
+    );
+
+    $update_role   = update_user_role($user_id, $role_id);
+    $update_office = update_assigned_office($user_id, $assigned_office);
+
+    if ($update_user && $update_role && $update_office) {
+
+        $_SESSION['flash_message'] = [
+            'type' => 'success',
+            'text' => 'User successfully updated.'
+        ];
+
+        header("Location: users.php");
+        exit;
     }
-  }
-  // Get user info
-  $user = $conn->query("SELECT * FROM users WHERE id=$user_id")->fetch_assoc();
-
-  // Get roles
-  $roles = get_all_roles();
-
-  // Get current role
-  $current_role = get_user_roles($user_id, 'ids');
-  $current_role_id = $current_role[0] ?? '';
+}
 ?>
 
 <?php include 'layouts/_header.php'; ?>
-  <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
+  <body class="hold-transition sidebar-collapse sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
       <div class="wrapper">
         <div class="content-wrapper">
           <?php include 'layouts/_navbar.php'; ?>
@@ -107,13 +149,37 @@
                                 <select name="role_id" id="role_id" class="form-control">
                                   <option value="">-- Select Role --</option>
                                   <?php foreach ($roles as $r): ?>
-                                    <option value="<?= $r['id'] ?>" <?= ($r['id'] == $current_role_id) ? "selected" : "" ?>>
+                                    <option value="<?= $r['id'] ?>" <?= ($r['id'] == $role_id) ? "selected" : "" ?>>
                                       <?= htmlspecialchars($r['role_name']) ?>
                                     </option>
                                   <?php endforeach; ?>
                                 </select>
                               </div>
-                              <div class="form-group">
+                                <div class="form-group">
+                                    <label for="assigned_office">Select Assigned Office:</label>
+
+                                    <select id="assigned_office" 
+                                            class="form-control" 
+                                            name="assigned_office">
+
+                                        <option value="">-- Select Assigned Office --</option>
+
+                                        <?php 
+                                            $selected_value = $_POST['assigned_office'] ?? $current_office_id;
+
+                                            foreach ($assigned_offices['result'] as $office): 
+                                        ?>
+
+                                            <option value="<?= htmlspecialchars($office['name']) ?>"
+                                                <?= ((string)$selected_value === (string)$office['name']) ? 'selected' : '' ?>>
+                                                <?= htmlspecialchars($office['name']) ?>
+                                            </option>
+
+                                        <?php endforeach; ?>
+
+                                    </select>
+                                </div>
+                                <div class="form-group">
                                 <label>
                                     <input type="checkbox" name="is_verified" value="1"
                                         <?= ($user['is_verified'] == 1) ? 'checked' : '' ?>>

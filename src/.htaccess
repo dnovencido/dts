@@ -90,6 +90,11 @@ RewriteRule ^reports/?$ reports.php [L]
 # ================================
 RewriteRule ^dashboard/?$ dashboard.php [L]
 
+# ================================
+# Audit Trails
+# ================================
+RewriteRule ^audit_trails/?$ audit_trails.php [L]
+RewriteRule ^audit_trails/view/([0-9]+)/?$ audit_trails_view.php?id=$1 [L,QSA]
 
 # ================================
 # Generic fallback (LAST)

@@ -92,6 +92,12 @@
                   <p>Filing Locations</p>
                 </a>
               </li>
+              <li class="nav-item">
+                <a href="/audit_trails/" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Audit Trail</p>
+                </a>
+              </li>
             </ul>
           </li>            
           <?php endif; ?>

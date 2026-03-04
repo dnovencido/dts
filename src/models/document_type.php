@@ -1,5 +1,6 @@
 <?php
     require "db/db.php";
+    require "models/audit.php";
 
     function validate_document_type($document_type = []) {
         $validation_errors = [];
@@ -69,6 +70,15 @@
 
         if ($stmt->execute())
             $flag = true;
+
+        // Audit Trail
+        if ($id === null) {
+            $new_id = $conn->insert_id;
+            log_audit("CREATE", "document_types", $new_id);
+
+        } else {
+            log_audit("UPDATE", "document_types", $id);
+        }
 
         $stmt->close();
 
@@ -299,6 +309,7 @@
 
             $stmt->bind_param("i", $id);
             if ($stmt->execute()) {
+                log_audit("DELETE", "document_types", $id);
                 $flag = true;
             }
         }

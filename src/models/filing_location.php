@@ -1,5 +1,6 @@
 <?php
     require "db/db.php";
+    require_once "models/audit.php";
 
     function validate_filing_location($filing_location = []) {
         $validation_errors = [];
@@ -64,6 +65,16 @@
         if ($stmt->execute())
             $flag = true;
 
+        // Audit Trail
+        if ($id === null) {
+            $new_id = $conn->insert_id;
+            log_audit("CREATE", "filing_locations", $new_id);
+
+        } else {
+            log_audit("UPDATE", "filing_locations", $id);
+        }
+
+
         $stmt->close();
 
         return $flag;
@@ -72,7 +83,7 @@
     function get_all_filing_locations($filter = [], $pagination = []) {
         global $conn;
 
-        $documents = ['total' => 0, 'result' => []];
+        $filing_location = ['total' => 0, 'result' => []];
 
         $query = "SELECT f.* FROM filing_locations f";
 
@@ -127,7 +138,7 @@
 
         $count_result = $stmt->get_result()->fetch_assoc();
 
-        $document_types['total'] = $count_result['total'] ?? 0;
+        $filing_location['total'] = $count_result['total'] ?? 0;
 
         $stmt->close();
 

@@ -1,5 +1,6 @@
 <?php
     require "db/db.php";
+    require "audit.php";
 
     function validate_document($document = []) {
         $validation_errors = [];
@@ -156,6 +157,15 @@
  
         if($stmt->execute())
             $flag = true;
+
+        // Audit Trail
+        if ($id === null) {
+            $new_id = $conn->insert_id;
+            log_audit("CREATE", "documents", $new_id);
+
+        } else {
+            log_audit("UPDATE", "documents", $id);
+        }
 
         $stmt->close();
 
@@ -420,6 +430,9 @@
             if ($result) {
                 $document = $result->fetch_array(MYSQLI_ASSOC);
             }
+            
+            log_audit("VIEW", "documents", $id);
+
             $stmt->close();
         }
 
@@ -448,6 +461,7 @@
             $stmt->bind_param("i", $id);
             if ($stmt->execute()) {
                 $flag = true;
+                log_audit("DELETE", "documents", $id);
             }
         }
 
