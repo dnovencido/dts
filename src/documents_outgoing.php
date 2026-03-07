@@ -5,8 +5,9 @@
   include "require_login.php"; 
   include "require_role.php"; 
   include "status.php";
+  include "models/assigned_office.php";
 
-  require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee'], 'outgoing document management');
+  require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee', 'receiving_officer'], 'outgoing document management');
 
   $document_types = get_document_types(["outgoing"]);
 
@@ -32,6 +33,19 @@
       'value'  => $_GET['status']
     ];
   }
+
+  // Check roles
+  $roles = get_user_roles($_SESSION['id'], 'names');
+
+  if(in_array('employee', $roles)) {
+    // Filter by office 
+    $current_office   = get_assigned_office($_SESSION['id']);
+    $filter['item'][] = [
+      'column' => 'receiving_office',
+      'value'  => $current_office
+    ];
+  }
+
 
   // Outgoing
   $filter['item'][] = [

@@ -5,8 +5,9 @@
   include "require_login.php"; 
   include "require_role.php"; 
   include "status.php";
+  include "models/assigned_office.php";
 
-  require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee'], 'incoming document management');
+  require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee', 'receiving_officer'], 'incoming document management');
 
   $document_types = get_document_types(["incoming"]);
 
@@ -38,7 +39,19 @@
     'column' => 'category',
     'value'  => 1
   ];
-  
+
+  // Check roles
+  $roles = get_user_roles($_SESSION['id'], 'names');
+
+  if(in_array('employee', $roles)) {
+    // Filter by office 
+    $current_office   = get_assigned_office($_SESSION['id']);
+      $filter['item'][] = [
+      'column' => 'receiving_office',
+      'value'  => $current_office
+    ];
+  }
+
   // Date Received
   if(!empty($_GET['date_received'])) {
     $range = $_GET['date_received'];
@@ -110,7 +123,7 @@
                         <!-- small box -->
                         <div class="small-box bg-primary">
                           <div class="inner">
-                            <h3><?= get_document_count(["incoming"], "received") ?></h3>
+                            <h3><?= get_document_count(["incoming"], "received", $filter) ?></h3>
                             <p>All Received Documents</p>
                           </div>
                           <div class="icon">
@@ -123,7 +136,7 @@
                         <!-- small box -->
                         <div class="small-box bg-warning">
                           <div class="inner">
-                              <h3><?= get_document_count(["incoming"], "pending") ?></h3>
+                              <h3><?= get_document_count(["incoming"], "pending", $filter) ?></h3>
                               <p>Pending Documents</p>
                           </div>
                           <div class="icon">

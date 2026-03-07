@@ -5,7 +5,8 @@
   include "require_login.php"; 
   include "require_role.php"; 
 
-  //require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee'], 'student registration');
+  require_role($_SESSION['id'], ['super_admin', 'administrator'], 'division');
+
   $filter = [];
 
   if (isset($_GET['query']) && $_GET['query'] !== '') {

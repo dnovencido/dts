@@ -10,7 +10,7 @@
   include "require_role.php"; 
   include "check_resource.php";
 
-  require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee'], 'incoming document management');
+  require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee', 'receiving_officer'], 'incoming document management');
 
   $errors = [];
   if (array_key_exists("id", $_GET)) {

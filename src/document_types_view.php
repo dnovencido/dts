@@ -4,7 +4,7 @@
     include "require_login.php"; 
     include "require_role.php"; 
 
-    //require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee'], 'student registration');
+    require_role($_SESSION['id'], ['super_admin', 'administrator'], 'document type');
 
     if (array_key_exists("id", $_GET)) {
       $document_type = view_document_type($_GET['id']);

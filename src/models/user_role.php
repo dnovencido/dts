@@ -34,7 +34,6 @@
         return $flag;
     }
 
-
     function get_user_roles($user_id, $type = 'names') {
         global $conn;
         $roles = [];

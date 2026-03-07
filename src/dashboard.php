@@ -2,10 +2,25 @@
   include "session.php"; 
   include "models/user_role.php"; 
   include "models/document.php";
+  include "models/assigned_office.php";
   include "require_login.php"; 
   include "require_role.php";
 
-  $document_count = get_document_counts();
+  $filter = [];
+
+  // Check roles
+  $roles = get_user_roles($_SESSION['id'], 'names');
+
+  if(in_array('employee', $roles)) {
+    // Filter by office 
+    $current_office = get_assigned_office($_SESSION['id']);
+      $filter['item'][] = [
+      'column' => 'receiving_office',
+      'value'  => $current_office
+    ];
+  }
+
+  $document_count = get_document_counts($filter);
 
 ?>
 <?php include 'layouts/_header.php'; ?>

@@ -8,8 +8,8 @@
   include "session.php"; 
   include "require_login.php"; 
   include "require_role.php"; 
-
-  require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee'], 'incoming document management');
+  
+  require_role($_SESSION['id'], ['super_admin', 'administrator', 'receiving_officer'], 'incoming document management');
 
   $document_types = get_document_types(["incoming"]);
   $divisions = get_all_divisions();

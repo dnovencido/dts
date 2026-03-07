@@ -468,7 +468,8 @@
         return $flag;
     }
 
-    function get_document_count($types = [], $status = '') {
+    function get_document_count($types = [], $status = '', $filter = []) {
+
         global $conn;
 
         if (!is_array($types)) {
@@ -477,7 +478,12 @@
 
         $type_ids = [];
 
+        /* =====================
+        Resolve Category Names
+        ===================== */
+
         if (!empty($types)) {
+
             $placeholders = implode(',', array_fill(0, count($types), '?'));
             $type_str = str_repeat('s', count($types));
 
@@ -497,20 +503,24 @@
         }
 
         /* =====================
-        Build Count Query
+        Base Query
         ===================== */
-        $query = "SELECT COUNT(*) AS total FROM documents";
+
+        $query = "SELECT COUNT(*) AS total FROM documents d";
 
         $conditions = [];
         $params = [];
         $typesStr = "";
 
-        /* Document Type Filter */
+        /* =====================
+        Document Type Filter
+        ===================== */
+
         if (!empty($type_ids)) {
 
             $placeholders = implode(',', array_fill(0, count($type_ids), '?'));
 
-            $conditions[] = "category IN ($placeholders)";
+            $conditions[] = "d.category IN ($placeholders)";
 
             foreach ($type_ids as $id) {
                 $params[] = $id;
@@ -518,21 +528,70 @@
             }
         }
 
-        /* Status Filter (pending / received) */
+        /* =====================
+        Status Filter
+        ===================== */
+
         if (!empty($status)) {
-            $conditions[] = "status = ?";
+
+            $conditions[] = "d.status = ?";
             $params[] = $status;
             $typesStr .= "s";
         }
 
-        /* Apply WHERE */
+        /* =====================
+        Dynamic Filters
+        ===================== */
+
+        foreach ($filter as $key => $value) {
+
+            if ($key === 'item' && is_array($value)) {
+
+                foreach ($value as $item) {
+
+                    if (!isset($item['column'], $item['value'])) continue;
+
+                    $conditions[] = "d.{$item['column']} = ?";
+                    $params[] = $item['value'];
+
+                    $typesStr .= is_numeric($item['value']) ? "i" : "s";
+                }
+            }
+
+            if ($key === 'date_range' && is_array($value) && count($value) >= 3) {
+
+                $column = $value[0][0];
+                $from   = $value[1];
+                $to     = $value[2];
+
+                if ($from && $to) {
+
+                    $conditions[] = "d.$column BETWEEN ? AND ?";
+                    $params[] = $from;
+                    $params[] = $to;
+                    $typesStr .= "ss";
+                }
+            }
+        }
+
+        /* =====================
+        Apply WHERE
+        ===================== */
+
         if (!empty($conditions)) {
 
             $query .= " WHERE " . implode(" AND ", $conditions);
         }
 
-        /* Execute */
+        /* =====================
+        Execute
+        ===================== */
+
         $stmt = $conn->prepare($query);
+
+        if (!$stmt) {
+            throw new Exception($conn->error);
+        }
 
         if (!empty($params)) {
             $stmt->bind_param($typesStr, ...$params);
@@ -542,7 +601,9 @@
 
         $row = $stmt->get_result()->fetch_assoc();
 
-        return $row['total'] ?? 0;
+        $stmt->close();
+
+        return (int)($row['total'] ?? 0);
     }
 
     function get_document_counts($filter = []) {
@@ -624,22 +685,19 @@
         return $counts;
     }
 
-    function count_documents($range = 6) {
+    function count_documents($range = 6, $filter = []) {
 
         global $conn;
 
-        // Allowed ranges
         $allowedRanges = [3, 6, 12];
 
         if (!in_array($range, $allowedRanges)) {
             $range = 6;
         }
 
-        // Calculate start and end dates
         $startDate = date('Y-m-01', strtotime("-" . ($range - 1) . " months"));
         $endDate   = date('Y-m-t');
 
-        // Initialize months
         $monthCounts = [];
 
         for ($i = $range - 1; $i >= 0; $i--) {
@@ -657,14 +715,40 @@
 
         $query = "
             SELECT 
-                DATE_FORMAT(date_received, '%Y-%m') AS month_key,
-                SUM(CASE WHEN category = '1' THEN 1 ELSE 0 END) AS incoming,
-                SUM(CASE WHEN category = '2' THEN 1 ELSE 0 END) AS outgoing
-            FROM documents
-            WHERE date_received BETWEEN ? AND ?
-            GROUP BY month_key
-            ORDER BY month_key
+                DATE_FORMAT(d.date_received, '%Y-%m') AS month_key,
+                SUM(CASE WHEN d.category = 1 THEN 1 ELSE 0 END) AS incoming,
+                SUM(CASE WHEN d.category = 2 THEN 1 ELSE 0 END) AS outgoing
+            FROM documents d
         ";
+
+        $conditions = ["d.date_received BETWEEN ? AND ?"];
+        $params = [$startDate, $endDate];
+        $types = "ss";
+
+        /* =====================
+        Apply Filters
+        ===================== */
+        foreach($filter as $key => $value) {
+
+            if ($key === 'item' && is_array($value)) {
+
+                foreach ($value as $item) {
+
+                    if (!isset($item['column'], $item['value'])) continue;
+
+                    $conditions[] = "d.{$item['column']} = ?";
+                    $params[] = $item['value'];
+
+                    $types .= is_numeric($item['value']) ? "i" : "s";
+                }
+            }
+        }
+
+        if (!empty($conditions)) {
+            $query .= " WHERE " . implode(" AND ", $conditions);
+        }
+
+        $query .= " GROUP BY month_key ORDER BY month_key";
 
         $stmt = $conn->prepare($query);
 
@@ -672,12 +756,11 @@
             throw new Exception($conn->error);
         }
 
-        $stmt->bind_param("ss", $startDate, $endDate);
+        $stmt->bind_param($types, ...$params);
 
         $stmt->execute();
 
         $result = $stmt->get_result();
-
 
         while ($row = $result->fetch_assoc()) {
 
@@ -686,7 +769,6 @@
             if (isset($monthCounts[$key])) {
 
                 $monthCounts[$key]['incoming'] = (int)$row['incoming'];
-
                 $monthCounts[$key]['outgoing'] = (int)$row['outgoing'];
             }
         }
@@ -709,103 +791,113 @@
         return $data;
     }
 
-    function count_documents_per_type($year = null, $category = null) {
+    function count_documents_per_type($year = null, $category = null, $filter = []) {
 
         global $conn;
 
         /* =========================
-        Validate category
+        Validate Category
         ========================= */
+
         $allowedCategories = [1, 2];
 
         if (!in_array($category, $allowedCategories)) {
             $category = null;
         }
 
-        // Use current year if not specified
         $year = $year ?? date('Y');
 
 
         /* =========================
-        Step 1: Fetch document types filtered by category
+        Base Query
         ========================= */
-        $types = [];
 
-        if ($category !== null) {
+        $query = "
+            SELECT 
+                dt.name AS label,
+                COUNT(*) AS total
+            FROM documents d
+            INNER JOIN document_types dt
+                ON dt.id = d.document_type
+        ";
 
-            $typeQuery = "
-                SELECT DISTINCT dt.id, dt.name
-                FROM document_types dt
-                INNER JOIN documents d 
-                    ON d.document_type = dt.id
-                WHERE d.category = ?
-                AND YEAR(d.date_received) = ?
-                ORDER BY dt.name
-            ";
-
-            $stmt = $conn->prepare($typeQuery);
-
-            if (!$stmt) {
-                throw new Exception($conn->error);
-            }
-
-            $stmt->bind_param("ii", $category, $year);
-
-        } else {
-
-            $typeQuery = "
-                SELECT id, name
-                FROM document_types
-                ORDER BY name
-            ";
-
-            $stmt = $conn->prepare($typeQuery);
-
-            if (!$stmt) {
-                throw new Exception($conn->error);
-            }
-        }
-
-        $stmt->execute();
-
-        $result = $stmt->get_result();
-
-        while ($row = $result->fetch_assoc()) {
-
-            $types[$row['id']] = [
-                'label' => $row['name'],
-                'count' => 0
-            ];
-        }
-
-        $stmt->close();
+        $conditions = ["YEAR(d.date_received) = ?"];
+        $params = [$year];
+        $types = "i";
 
 
         /* =========================
-        Step 2: Count documents per type for selected year
+        Category Filter
         ========================= */
-        $query = "
-            SELECT 
-                document_type,
-                COUNT(*) AS total
-            FROM documents
-            WHERE YEAR(date_received) = ?
-        ";
-
-        $params = [$year];
-        $paramTypes = "i";
 
         if ($category !== null) {
 
-            $query .= " AND category = ?";
-
+            $conditions[] = "d.category = ?";
             $params[] = $category;
-
-            $paramTypes .= "i";
+            $types .= "i";
         }
 
-        $query .= " GROUP BY document_type ORDER BY document_type";
 
+        /* =========================
+        Dynamic Filters
+        ========================= */
+
+        foreach ($filter as $key => $value) {
+
+            if ($key === 'item' && is_array($value)) {
+
+                foreach ($value as $item) {
+
+                    if (!isset($item['column'], $item['value'])) continue;
+
+                    $conditions[] = "d.{$item['column']} = ?";
+                    $params[] = $item['value'];
+
+                    $types .= is_numeric($item['value']) ? "i" : "s";
+                }
+            }
+
+            if ($key === 'date_range' && is_array($value) && count($value) >= 3) {
+
+                $column = $value[0][0];
+                $from   = $value[1];
+                $to     = $value[2];
+
+                if ($from && $to) {
+
+                    $conditions[] = "d.$column BETWEEN ? AND ?";
+                    $params[] = $from;
+                    $params[] = $to;
+                    $types .= "ss";
+                }
+            }
+        }
+
+
+        /* =========================
+        Apply WHERE
+        ========================= */
+
+        if (!empty($conditions)) {
+
+            $query .= " WHERE " . implode(" AND ", $conditions);
+        }
+
+
+        /* =========================
+        Group Results
+        ========================= */
+
+        $query .= "
+            GROUP BY d.document_type
+            HAVING total > 0
+            ORDER BY dt.name
+        ";
+
+
+        /* =========================
+        Execute Query
+        ========================= */
 
         $stmt = $conn->prepare($query);
 
@@ -813,28 +905,17 @@
             throw new Exception($conn->error);
         }
 
-        $stmt->bind_param($paramTypes, ...$params);
+        $stmt->bind_param($types, ...$params);
 
         $stmt->execute();
 
         $result = $stmt->get_result();
 
-        while ($row = $result->fetch_assoc()) {
-
-            $typeId = $row['document_type'];
-
-            if (isset($types[$typeId])) {
-
-                $types[$typeId]['count'] = (int)$row['total'];
-            }
-        }
-
-        $stmt->close();
-
 
         /* =========================
-        Format output for Chart.js
+        Format Output
         ========================= */
+
         $data = [
             'year' => (int)$year,
             'category' => $category,
@@ -842,11 +923,13 @@
             'counts' => []
         ];
 
-        foreach ($types as $type) {
+        while ($row = $result->fetch_assoc()) {
 
-            $data['labels'][] = $type['label'];
-            $data['counts'][] = $type['count'];
+            $data['labels'][] = $row['label'];
+            $data['counts'][] = (int)$row['total'];
         }
+
+        $stmt->close();
 
         return $data;
     }

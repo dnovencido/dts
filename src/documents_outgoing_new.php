@@ -9,7 +9,7 @@
   include "require_login.php"; 
   include "require_role.php"; 
 
-  require_role($_SESSION['id'], ['super_admin', 'administrator', 'employee'], 'outgoing document management');
+  require_role($_SESSION['id'], ['super_admin', 'administrator', 'receiving_officer'], 'outgoing document management');
 
   $document_types = get_document_types(["outgoing"]);
   $divisions = get_all_divisions();

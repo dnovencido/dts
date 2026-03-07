@@ -27,9 +27,8 @@ if (!$user) {
 
 $current_office   = get_assigned_office($user_id);
 $roles            = get_all_roles();
-
-
-$current_role_id  = $current_role_ids[0] ?? '';
+$current_role_ids = get_user_roles($user_id, 'ids');
+$role_id  = $current_role_ids[0] ?? '';
 $assigned_offices = get_all_assigned_offices();
 $current_office_id = $current_office ? $current_office : '';
 
@@ -37,7 +36,6 @@ $current_office_id = $current_office ? $current_office : '';
    HANDLE FORM SUBMIT
 -----------------------------*/
 if (isset($_POST['submit'])) {
-
     $fname            = trim($_POST['fname']);
     $mname            = trim($_POST['mname']);
     $lname            = trim($_POST['lname']);
@@ -170,9 +168,11 @@ if (isset($_POST['submit'])) {
                                             foreach ($assigned_offices['result'] as $office): 
                                         ?>
 
-                                            <option value="<?= htmlspecialchars($office['name']) ?>"
-                                                <?= ((string)$selected_value === (string)$office['name']) ? 'selected' : '' ?>>
+                                            <option value="<?= htmlspecialchars($office['id']) ?>"
+                                                <?= ((string)$selected_value === (string)$office['id']) ? 'selected' : '' ?>>
+
                                                 <?= htmlspecialchars($office['name']) ?>
+
                                             </option>
 
                                         <?php endforeach; ?>
