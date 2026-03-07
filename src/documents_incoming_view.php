@@ -11,11 +11,10 @@
      
     if(array_key_exists("id", $_GET)) {
       $document = view_document($_GET['id']);
-      
       if(!$document)
         abort_404("Document does not exist.", "/documents/incoming");
-      
       $document_id = $document['id'];
+      $logs = get_document_logs($document['id']);
     }
 
 ?>
@@ -130,10 +129,14 @@
                               </tbody>
                             </table>
                           </div>
-                          <hr>
+                          <div class="document-timeline">
+                          <?php include "shared/_document_status.php"; ?>
+                          </div>  
+                          <hr>                        
                           <div id="document-viewer" class="mt-4">
                             <?php include "shared/_file-viewer.php"; ?>
                           </div>
+                        </div>                        
                       </div>
                       <!-- /.card-body -->
                       </div>

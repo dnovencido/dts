@@ -16,6 +16,7 @@
       abort_404("Document does not exist.", "/documents/outgoing");
   
     $document_id = $document['id'];
+    $logs = get_document_logs($document['id']);
   }
 
 ?>
@@ -129,6 +130,10 @@
                               </tbody>
                             </table>
                         </div>
+                        <div class="document-timeline">
+                          <?php include "shared/_document_status.php"; ?>
+                        </div>
+                        <hr>  
                         <div id="document-viewer" class="mt-4">
                           <?php include "shared/_file-viewer.php"; ?>
                         </div>

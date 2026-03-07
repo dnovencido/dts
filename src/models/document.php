@@ -67,14 +67,14 @@
 
         $flag = false;
 
-        // Allowed columns
         $allowed = [
-            'title', 'user_id', 'category', 'document_type', 'document_date',
-            'document_number', 'date_received','concerned_division', 'names_stakeholders',
-            'receiving_office','signatories','status','filing_location','file', 'file_name', 'file_type', 'last_updated', 'date_created'
+            'title','user_id','category','document_type','document_date',
+            'document_number','date_received','concerned_division',
+            'names_stakeholders','receiving_office','signatories',
+            'status','filing_location','file','file_name','file_type',
+            'last_updated','date_created'
         ];
 
-        // Columns that must always be JSON
         $jsonFields = [
             'concerned_division',
             'names_stakeholders',
@@ -84,13 +84,17 @@
         /* ===============================
         Filter allowed fields
         =============================== */
+
         $data = array_intersect_key($fields, array_flip($allowed));
 
         /* ===============================
-        Normalize data (JSON + strings)
+        Normalize data
         =============================== */
+
         foreach ($data as $key => $value) {
+
             if (in_array($key, $jsonFields)) {
+
                 if (empty($value)) {
                     $data[$key] = json_encode([]);
                 } elseif (is_array($value)) {
@@ -104,7 +108,9 @@
                         JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR
                     );
                 }
+
             } else {
+
                 if (is_string($value)) {
                     $data[$key] = trim($value);
                 }
@@ -119,24 +125,44 @@
             $data['date_received'] = null;
         }
 
-        $data['filing_location'] =  isset($data['filing_location']) && $data['filing_location'] !== '' ? (int)$data['filing_location'] : null;
+        $data['filing_location'] =
+            isset($data['filing_location']) && $data['filing_location'] !== ''
+            ? (int)$data['filing_location']
+            : null;
+
+
+        /* ===============================
+        CREATE DOCUMENT
+        =============================== */
 
         if ($id === null) {
+
             $data['date_created'] = date("Y-m-d H:i:s");
+
             $columns = array_keys($data);
             $placeholders = implode(",", array_fill(0, count($columns), "?"));
 
             $sql = "INSERT INTO documents (`" .
-                implode("`,`", $columns) .
-                "`) VALUES ($placeholders)";
+                    implode("`,`", $columns) .
+                    "`) VALUES ($placeholders)";
 
             $stmt = $conn->prepare($sql);
 
-            $types  = str_repeat("s", count($columns));
+            $types = str_repeat("s", count($columns));
             $values = array_values($data);
 
             $stmt->bind_param($types, ...$values);
-        } else {
+
+        } 
+
+        /* ===============================
+        UPDATE DOCUMENT
+        =============================== */
+
+        else {
+
+            $old_status = get_document_status($id);
+
             $data['last_updated'] = date("Y-m-d H:i:s");
 
             $set = implode(", ", array_map(
@@ -148,23 +174,61 @@
 
             $stmt = $conn->prepare($sql);
 
-            $types  = str_repeat("s", count($data)) . "i";
+            $types = str_repeat("s", count($data)) . "i";
             $values = array_merge(array_values($data), [$id]);
 
             $stmt->bind_param($types, ...$values);
         }
- 
- 
-        if($stmt->execute())
+
+
+        /* ===============================
+        Execute
+        =============================== */
+
+        if ($stmt->execute()) {
+
             $flag = true;
 
-        // Audit Trail
-        if ($id === null) {
-            $new_id = $conn->insert_id;
-            log_audit("CREATE", "documents", $new_id);
+            if ($id === null) {
 
-        } else {
-            log_audit("UPDATE", "documents", $id);
+                $new_id = $conn->insert_id;
+
+                log_document_action(
+                    $new_id,
+                    "CREATED",
+                    $data['status'] ?? null
+                );
+
+                log_audit("CREATE", "documents", $new_id);
+
+            } else {
+
+                log_audit("UPDATE", "documents", $id);
+
+                $new_status = $data['status'] ?? $old_status;
+
+                /* --------------------------------
+                Handle Legacy Documents
+                -------------------------------- */
+
+                ensure_initial_document_log(
+                    $id,
+                    $old_status
+                );
+
+                /* --------------------------------
+                Log status change only if changed
+                -------------------------------- */
+
+                if ($new_status !== $old_status) {
+
+                    log_document_action(
+                        $id,
+                        "STATUS_CHANGED",
+                        $new_status
+                    );
+                }
+            }
         }
 
         $stmt->close();
@@ -946,4 +1010,111 @@
         return $result['id'] ?? null;
     }
 
+    function log_document_action($document_id, $action, $status = null) {
+        global $conn;
+
+        $user_id = $_SESSION['id'] ?? null;
+
+        $sql = "
+            INSERT INTO document_logs
+            (document_id, user_id, action, status, created_at)
+            VALUES (?, ?, ?, ?, NOW())
+        ";
+
+        $stmt = $conn->prepare($sql);
+
+        if (!$stmt) {
+            throw new Exception($conn->error);
+        }
+
+        $stmt->bind_param("iiss", $document_id, $user_id, $action, $status);
+
+        $stmt->execute();
+
+        $stmt->close();
+    }
+
+    function get_document_status($document_id){
+        global $conn;
+
+        $sql = "SELECT status FROM documents WHERE id = ?";
+
+        $stmt = $conn->prepare($sql);
+
+        $stmt->bind_param("i", $document_id);
+        $stmt->execute();
+
+        $result = $stmt->get_result()->fetch_assoc();
+
+        $stmt->close();
+
+        return $result['status'] ?? null;
+    }   
+    
+    function document_has_logs($document_id) {
+        global $conn;
+
+        $sql = "SELECT id FROM document_logs WHERE document_id = ? LIMIT 1";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $document_id);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        $has_logs = $result->num_rows > 0;
+
+        $stmt->close();
+
+        return $has_logs;
+    }
+
+    function ensure_initial_document_log($document_id, $status) {
+        if (!$status) {
+            return;
+        }
+
+        if (!document_has_logs($document_id)) {
+
+            log_document_action(
+                $document_id,
+                "INITIAL_STATUS",
+                $status
+            );
+        }
+    }
+
+    function get_document_logs($document_id) {
+        global $conn;
+
+        $sql = "
+            SELECT 
+                dl.action,
+                dl.status,
+                dl.created_at,
+                u.fname,
+                u.lname
+            FROM document_logs dl
+            LEFT JOIN users u ON u.id = dl.user_id
+            WHERE dl.document_id = ?
+            ORDER BY dl.created_at ASC
+        ";
+
+        $stmt = $conn->prepare($sql);
+
+        $stmt->bind_param("i", $document_id);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        $logs = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $logs[] = $row;
+        }
+
+        $stmt->close();
+
+        return $logs;
+    }    
 ?>
