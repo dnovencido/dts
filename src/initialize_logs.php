@@ -22,33 +22,51 @@ if (!$result) {
     die("Query failed: " . $conn->error);
 }
 
-$total_inserted = 0;
+$total = 0;
 
 while ($row = $result->fetch_assoc()) {
 
     $document_id = (int) $row['id'];
     $user_id     = (int) $row['user_id'];
-    $status      = $row['status'] ?: 'pending'; // default to pending
+    $status      = $row['status'] ?: 'pending';
 
-    $insert = "
+    /*
+    ----------------------------------------
+    1. Insert INITIAL_STATUS → pending
+    ----------------------------------------
+    */
+
+    $stmt1 = $conn->prepare("
         INSERT INTO document_logs
         (document_id, user_id, action, status, created_at)
-        VALUES (?, ?, 'INITIAL_STATUS', ?, NOW())
-    ";
+        VALUES (?, ?, 'INITIAL_STATUS', 'pending', NOW())
+    ");
 
-    $stmt = $conn->prepare($insert);
+    $stmt1->bind_param("ii", $document_id, $user_id);
+    $stmt1->execute();
+    $stmt1->close();
 
-    if (!$stmt) {
-        die($conn->error);
+
+    /*
+    ----------------------------------------
+    2. Insert CURRENT STATUS (if not pending)
+    ----------------------------------------
+    */
+
+    if ($status !== 'pending') {
+
+        $stmt2 = $conn->prepare("
+            INSERT INTO document_logs
+            (document_id, user_id, action, status, created_at)
+            VALUES (?, ?, 'STATUS_CHANGED', ?, NOW())
+        ");
+
+        $stmt2->bind_param("iis", $document_id, $user_id, $status);
+        $stmt2->execute();
+        $stmt2->close();
     }
 
-    $stmt->bind_param("iis", $document_id, $user_id, $status);
-
-    if ($stmt->execute()) {
-        $total_inserted++;
-    }
-
-    $stmt->close();
+    $total++;
 }
 
-echo "Initialized logs for {$total_inserted} document(s).\n";
+echo "Initialized {$total} legacy document(s).";
