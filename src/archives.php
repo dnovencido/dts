@@ -120,7 +120,7 @@
                             <p>All Archived Documents</p>
                           </div>
                           <div class="icon">
-                            <i class="ion ion-document-text"></i>
+                            <i class="ion ion ion-archive"></i>
                           </div>
                         </div>
                       </div>
