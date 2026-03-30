@@ -478,18 +478,28 @@
 
         $query = "SELECT d.*, 
             CASE 
+                /* Less than 1 month → show weeks */
+                WHEN TIMESTAMPDIFF(MONTH, d.document_date, CURDATE()) = 0 
+                THEN CONCAT(
+                    FLOOR(DATEDIFF(CURDATE(), d.document_date) / 7), ' week',
+                    IF(FLOOR(DATEDIFF(CURDATE(), d.document_date) / 7) != 1, 's', '')
+                )
+
+                /* Less than 1 year → show months */
                 WHEN TIMESTAMPDIFF(YEAR, d.document_date, CURDATE()) = 0 
                 THEN CONCAT(
                     TIMESTAMPDIFF(MONTH, d.document_date, CURDATE()), ' month',
                     IF(TIMESTAMPDIFF(MONTH, d.document_date, CURDATE()) > 1, 's', '')
                 )
 
+                /* Exact years */
                 WHEN (TIMESTAMPDIFF(MONTH, d.document_date, CURDATE()) % 12) = 0
                 THEN CONCAT(
                     TIMESTAMPDIFF(YEAR, d.document_date, CURDATE()), ' year',
                     IF(TIMESTAMPDIFF(YEAR, d.document_date, CURDATE()) > 1, 's', '')
                 )
 
+                /* Years + months */
                 ELSE CONCAT(
                     TIMESTAMPDIFF(YEAR, d.document_date, CURDATE()), ' year',
                     IF(TIMESTAMPDIFF(YEAR, d.document_date, CURDATE()) > 1, 's', ''),
@@ -497,7 +507,7 @@
                     TIMESTAMPDIFF(MONTH, d.document_date, CURDATE()) % 12, ' month',
                     IF(TIMESTAMPDIFF(MONTH, d.document_date, CURDATE()) % 12 > 1, 's', '')
                 )
-            END AS document_age,
+            END AS document_age
 
             IFNULL(dt.retention_period, 5) AS retention_period,
 
