@@ -97,6 +97,11 @@ RewriteRule ^audit_trails/?$ audit_trails.php [L]
 RewriteRule ^audit_trails/view/([0-9]+)/?$ audit_trails_view.php?id=$1 [L,QSA]
 
 # ================================
+# Archived
+# ================================
+RewriteRule ^archives/?$ archives.php [L]
+
+# ================================
 # Generic fallback (LAST)
 # ================================
 RewriteRule ^([^\.]+)$ $1.php [NC,L]

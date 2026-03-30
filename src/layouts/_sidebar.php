@@ -42,6 +42,14 @@
               </p>
             </a>
           </li>
+          <li class="nav-item">
+            <a href="/archives/" class="nav-link">
+              <i class="nav-icon fa-solid fa-box-archive"></i>
+              <p>
+               Archives
+              </p>
+            </a>
+          </li>
           <?php 
             $user_roles = get_user_roles($_SESSION['id'], 'names'); 
             if (count(array_intersect(['super_admin', 'administrator'], $user_roles)) > 0): 
