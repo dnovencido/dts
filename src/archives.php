@@ -114,7 +114,7 @@
                     <div id="cards" class="row">
                       <div class="col-lg-3 col-6">
                         <!-- small box -->
-                        <div class="small-box bg-primary">
+                        <div class="small-box bg-secondary">
                           <div class="inner">
                             <h3><?= get_document_count([], "archived", $filter) ?></h3>
                             <p>All Archived Documents</p>
