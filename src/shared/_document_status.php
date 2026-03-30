@@ -7,6 +7,7 @@
 
         if($log['status'] == "pending") $color = "warning";
         if($log['status'] == "received") $color = "success";
+        if($log['status'] == "archived") $color = "secondary";
     ?>
     <div class="timeline-step">
         <div class="timeline-icon bg-<?= $color ?>">

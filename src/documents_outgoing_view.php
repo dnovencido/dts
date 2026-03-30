@@ -127,6 +127,12 @@
                                   <th class="table-light">Status</th>
                                   <td ><?= !empty($document['status']) ? ucfirst(strtolower(htmlspecialchars($document['status'], ENT_QUOTES))) : '-' ?></td>
                                 </tr>
+                                <tr>
+                                  <th class="table-light">Document Age</th>
+                                  <td><?= $document['document_age'] ?></td>
+                                  <th class="table-light">Retention Status</th>
+                                  <td><?= $document['disposal_status'] ?></td>
+                                </tr>
                               </tbody>
                             </table>
                         </div>

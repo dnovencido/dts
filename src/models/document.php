@@ -231,6 +231,9 @@
             }
         }
 
+        // Check for document disposal
+        archive_document($id);
+
         $stmt->close();
 
         return $flag;
@@ -474,17 +477,54 @@
         $document = [];
 
         $query = "SELECT d.*, 
-           CONCAT(
-                    u.fname, ' ',
-                    IF(u.mname IS NOT NULL AND u.mname != '', CONCAT(u.mname, ' '), ''),
-                    u.lname
-                ) AS emp_name,
-            f.name as filing_location_name, dt.name AS `document_type_name`, r.name AS `receiving_office_name` FROM `documents` as d 
-            LEFT JOIN `categories` as `c` ON d.category = c.id 
-            LEFT JOIN `document_types` as `dt` ON d.document_type = dt.id 
-            LEFT JOIN `filing_locations` as `f` ON d.filing_location = f.id
-            LEFT JOIN `users` as `u` ON d.user_id = u.id
-            LEFT JOIN receiving_offices r ON d.receiving_office = r.id WHERE d.id = ?";
+            CASE 
+                WHEN TIMESTAMPDIFF(YEAR, d.document_date, CURDATE()) = 0 
+                THEN CONCAT(
+                    TIMESTAMPDIFF(MONTH, d.document_date, CURDATE()), ' month',
+                    IF(TIMESTAMPDIFF(MONTH, d.document_date, CURDATE()) > 1, 's', '')
+                )
+
+                WHEN (TIMESTAMPDIFF(MONTH, d.document_date, CURDATE()) % 12) = 0
+                THEN CONCAT(
+                    TIMESTAMPDIFF(YEAR, d.document_date, CURDATE()), ' year',
+                    IF(TIMESTAMPDIFF(YEAR, d.document_date, CURDATE()) > 1, 's', '')
+                )
+
+                ELSE CONCAT(
+                    TIMESTAMPDIFF(YEAR, d.document_date, CURDATE()), ' year',
+                    IF(TIMESTAMPDIFF(YEAR, d.document_date, CURDATE()) > 1, 's', ''),
+                    ', ',
+                    TIMESTAMPDIFF(MONTH, d.document_date, CURDATE()) % 12, ' month',
+                    IF(TIMESTAMPDIFF(MONTH, d.document_date, CURDATE()) % 12 > 1, 's', '')
+                )
+            END AS document_age,
+
+            IFNULL(dt.retention_period, 5) AS retention_period,
+
+            CASE 
+                WHEN TIMESTAMPDIFF(YEAR, d.document_date, CURDATE()) 
+                    >= IFNULL(dt.retention_period, 5)
+                THEN 'For Archiving'
+                ELSE 'Active'
+            END AS disposal_status,
+
+            CONCAT(
+                u.fname, ' ',
+                IF(u.mname IS NOT NULL AND u.mname != '', CONCAT(u.mname, ' '), ''),
+                u.lname
+            ) AS emp_name,
+            
+            f.name as filing_location_name, 
+            dt.name AS document_type_name, 
+            r.name AS receiving_office_name
+
+        FROM documents as d 
+        LEFT JOIN categories as c ON d.category = c.id 
+        LEFT JOIN document_types as dt ON d.document_type = dt.id 
+        LEFT JOIN filing_locations as f ON d.filing_location = f.id
+        LEFT JOIN users as u ON d.user_id = u.id
+        LEFT JOIN receiving_offices r ON d.receiving_office = r.id 
+        WHERE d.id = ?";
 
         if ($stmt = $conn->prepare($query)) {
             $stmt->bind_param("i", $id);
@@ -1116,5 +1156,97 @@
         $stmt->close();
 
         return $logs;
-    }    
+    }  
+
+    function archive_document($id) {
+        global $conn;
+
+        $flag = false;
+
+        /* ===============================
+        Check current status
+        =============================== */
+        $old_status = get_document_status($id);
+
+        if (!$old_status) {
+            return false; // document not found
+        }
+
+        /* ===============================
+        Archive only if eligible
+        =============================== */
+        $sql = "
+            UPDATE documents d
+            LEFT JOIN document_types dt ON d.document_type = dt.id
+            SET 
+                d.status = 'archived',
+                d.last_updated = NOW()
+            WHERE d.id = ?
+            AND d.document_date IS NOT NULL
+            AND TIMESTAMPDIFF(YEAR, d.document_date, CURDATE()) 
+                >= IFNULL(dt.retention_period, 5)
+            AND d.status != 'archived'
+        ";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+
+        /* ===============================
+        If updated → log actions
+        =============================== */
+        if ($stmt->affected_rows > 0) {
+
+            $flag = true;
+            $new_status = 'archived';
+
+            /* --------------------------------
+            Ensure initial log exists
+            -------------------------------- */
+            ensure_initial_document_log($id, $old_status);
+
+            /* --------------------------------
+            Log ARCHIVED only (avoid duplicates)
+            -------------------------------- */
+            if (!has_archive_log($id)) {
+                log_document_action(
+                    $id,
+                    "ARCHIVED",
+                    $new_status
+                );
+            }
+
+            /* --------------------------------
+            Audit trail
+            -------------------------------- */
+            log_audit("ARCHIVE", "documents", $id);
+        }
+
+        $stmt->close();
+
+        return $flag;
+    }
+    
+    function has_archive_log($document_id) {
+        global $conn;
+
+        $sql = "
+            SELECT id 
+            FROM document_logs 
+            WHERE document_id = ? 
+            AND action = 'ARCHIVED'
+            LIMIT 1
+        ";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $document_id);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+        $exists = $result->num_rows > 0;
+
+        $stmt->close();
+
+        return $exists;
+    }
 ?>

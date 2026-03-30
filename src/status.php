@@ -26,6 +26,7 @@
             'options' => [
                 'pending'  => 'Pending',
                 'received' => 'Received',
+                'archived' => 'Archived'
             ]
         ],
         'outgoing' => [
@@ -33,6 +34,7 @@
                 'pending'  => 'Pending',
                 'released' => 'Released',
                 'received' => 'Received',
+                'archived' => 'Archived'
             ]
         ]
     ];
