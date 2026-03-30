@@ -507,7 +507,7 @@
                     TIMESTAMPDIFF(MONTH, d.document_date, CURDATE()) % 12, ' month',
                     IF(TIMESTAMPDIFF(MONTH, d.document_date, CURDATE()) % 12 > 1, 's', '')
                 )
-            END AS document_age
+            END AS document_age,
 
             IFNULL(dt.retention_period, 5) AS retention_period,
 
