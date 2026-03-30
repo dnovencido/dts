@@ -29,6 +29,7 @@
           $_POST = [
             'name' => isset($_POST['name']) ? $_POST['name'] : $document_type['name'],
             'type' => isset($_POST['type']) ? $_POST['type'] : $document_type['type'],
+            'retention_period' => isset($_POST['retention_period']) ? $_POST['retention_period'] : $document_type['retention_period'],
           ];
         }
     }

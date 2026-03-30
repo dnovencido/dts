@@ -99,6 +99,7 @@
                                   <th>#</th>
                                   <th>Name</th>
                                   <th>Type</th>
+                                  <th>Retention Period</th>
                                   <th>Last Updated</th>
                                   <th>Date Created</th>
                                   <th>Actions</th>
@@ -112,7 +113,8 @@
                                       <td><?= $start + ++$key ?></td>
                                       <td><?= $value['name'] ?></td>
                                       <td><?= $value['type'] ?></td>
-                                        <td> <?= empty($value['last_updated']) ? 'N/A' : date('M d, Y g:i A', strtotime($value['last_updated'])) ?></td>
+                                      <td><?= $value['retention_period'] ?> years </td>
+                                      <td> <?= empty($value['last_updated']) ? 'N/A' : date('M d, Y g:i A', strtotime($value['last_updated'])) ?></td>
                                       <td><?= date('M d, Y @ h:i a', strtotime($value['date_created'])) ?></td>
                                       <td class="action-buttons">
                                           <button data-url="/document_types/view/<?= $value['id'] ?>" class="btn bg-gradient-info btn-sm view-modal"><i class="fa-solid fa-eye"></i></button>

@@ -23,6 +23,8 @@
         <td><?= htmlspecialchars($document_type['name'], ENT_QUOTES) ?></td>
         <th class="table-light">Type</th>
         <td><?= htmlspecialchars($document_type['type'], ENT_QUOTES) ?></td>
+        <th class="table-light">Retention period</th>
+        <td><?= htmlspecialchars($document_type['retention_period'], ENT_QUOTES) ?></td>
       </tr>
       <tr>
         <th class="table-light">Last Updated</th>

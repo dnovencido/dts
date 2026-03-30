@@ -13,7 +13,15 @@
             </div>
             <div class="form-group">
                 <label for="type">Type</label>
-                <input type="text" class="form-control" id="type" placeholder="Enter type" name="type" value="<?= htmlspecialchars($_POST['type'] ?? '', ENT_QUOTES) ?>">
+                <select class="form-control" id="type" name="type">
+                    <option value="">-- Select Type --</option>
+                    <option value="incoming" <?= (($_POST['type'] ?? '') == 'incoming') ? 'selected' : '' ?>>Incoming</option>
+                    <option value="outgoing" <?= (($_POST['type'] ?? '') == 'outgoing') ? 'selected' : '' ?>>Outgoing</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="type">Retention period (In years)</label>
+                <input type="text" class="form-control" id="type" placeholder="Enter type" name="retention_period" value="<?= htmlspecialchars($_POST['retention_period'] ?? '', ENT_QUOTES) ?>">
             </div>
             <button type="submit" name="submit" class="btn btn-primary"> <i class="fa-solid fa-floppy-disk"></i> Save</button>
         </form>

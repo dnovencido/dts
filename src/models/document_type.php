@@ -8,6 +8,7 @@
         if (!empty($document_type)) {
             $title = trim($document_type['name'] ?? '');
             $document_type = $document_type['type'] ?? '';
+            $retention_period = $document_type['retention_period'] ?? '';
             
             // Title
             if (empty($title)) {
@@ -17,6 +18,11 @@
             // Document Type
             if (empty($document_type)) {
                 $validation_errors[] = "Document Type is required.";
+            } 
+
+            // Retention period
+            if (empty($retention_period)) {
+                $validation_errors[] = "Retention period is required.";
             } 
         } else {
             $validation_errors[] = "No data submitted.";
